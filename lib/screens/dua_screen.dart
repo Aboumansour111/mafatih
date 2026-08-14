@@ -41,7 +41,7 @@ class DuaScreen extends StatelessWidget {
               padding: const EdgeInsets.all(20),
 
               decoration: BoxDecoration(
-                color: const Color(0xff00695c).withOpacity(0.05),
+                color: const Color(0xff00695c).withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(20),
               ),
 

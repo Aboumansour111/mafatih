@@ -40,7 +40,7 @@ class CategoryCard extends StatelessWidget {
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
 
             blurRadius: 15,
 
@@ -73,7 +73,7 @@ class CategoryCard extends StatelessWidget {
                 padding: const EdgeInsets.all(15),
 
                 decoration: BoxDecoration(
-                  color: const Color(0xff00695c).withOpacity(0.1),
+                  color: const Color(0xff00695c).withValues(alpha: 0.1),
 
                   shape: BoxShape.circle,
                 ),
