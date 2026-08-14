@@ -1,0 +1,20 @@
+[
+  {
+    "id": "dua_faraj",
+    "title": "دعای فرج",
+    "category": "duas",
+    "arabicText": "اللهم كن لوليك الحجة بن الحسن...",
+    "translation": "خدایا برای ولی خودت حجت بن الحسن...",
+    "source": "بحارالانوار",
+    "favorite": false
+  },
+  {
+    "id": "dua_ahad",
+    "title": "دعای عهد",
+    "category": "duas",
+    "arabicText": "اللهم رب النور العظيم...",
+    "translation": "خدایا ای پروردگار نور عظیم...",
+    "source": "مصباح المتهجد",
+    "favorite": false
+  }
+]

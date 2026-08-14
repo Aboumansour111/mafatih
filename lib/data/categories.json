@@ -1,0 +1,32 @@
+[
+  {
+    "id": "duas",
+    "title": "ادعیه",
+    "icon": "dua"
+  },
+  {
+    "id": "amal",
+    "title": "اعمال",
+    "icon": "calendar"
+  },
+  {
+    "id": "ziyarat",
+    "title": "زیارات",
+    "icon": "mosque"
+  },
+  {
+    "id": "quran",
+    "title": "سوره‌های قرآن",
+    "icon": "quran"
+  },
+  {
+    "id": "other",
+    "title": "سایر",
+    "icon": "more"
+  },
+  {
+    "id": "favorite",
+    "title": "علاقه‌مندی‌ها",
+    "icon": "favorite"
+  }
+]
