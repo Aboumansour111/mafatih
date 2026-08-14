@@ -9,37 +9,81 @@ class DuaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
+    return Scaffold(
+      appBar: AppBar(title: Text(dua.title), centerTitle: true),
 
-      child: Scaffold(
-        appBar: AppBar(title: Text(dua.title), centerTitle: true),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
 
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // بسم الله الرحمن الرحیم
+            const Text(
+              'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ',
 
-            children: [
-              Text(
+              textDirection: TextDirection.rtl,
+
+              textAlign: TextAlign.center,
+
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                height: 2,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // متن عربی
+            Container(
+              padding: const EdgeInsets.all(20),
+
+              decoration: BoxDecoration(
+                color: const Color(0xff00695c).withOpacity(0.05),
+                borderRadius: BorderRadius.circular(20),
+              ),
+
+              child: Text(
                 dua.arabic,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 28, height: 2),
+
+                textDirection: TextDirection.rtl,
+
+                textAlign: TextAlign.justify,
+
+                style: const TextStyle(
+                  fontSize: 22,
+                  height: 2.2,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
+            ),
 
-              const SizedBox(height: 30),
+            const SizedBox(height: 25),
 
-              const Divider(),
+            // عنوان ترجمه
+            const Text(
+              'ترجمه',
 
-              const SizedBox(height: 20),
+              textDirection: TextDirection.rtl,
 
-              Text(
-                dua.translation,
-                style: const TextStyle(fontSize: 18, height: 2),
-              ),
-            ],
-          ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 10),
+
+            // ترجمه فارسی
+            Text(
+              dua.translation,
+
+              textDirection: TextDirection.rtl,
+
+              textAlign: TextAlign.justify,
+
+              style: const TextStyle(fontSize: 17, height: 2),
+            ),
+          ],
         ),
       ),
     );

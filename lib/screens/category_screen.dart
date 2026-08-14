@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/category.dart';
 import '../models/dua.dart';
+import 'dua_screen.dart';
 import '../services/content_service.dart';
 
 class CategoryScreen extends StatelessWidget {
@@ -83,17 +84,100 @@ class CategoryScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final dua = categoryDuas[index];
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 10),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 15),
 
-                child: ListTile(
-                  title: Text(dua.title, textDirection: TextDirection.rtl),
+                decoration: BoxDecoration(
+                  color: Colors.white,
 
-                  trailing: const Icon(Icons.arrow_back_ios_rounded, size: 18),
+                  borderRadius: BorderRadius.circular(22),
+
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(22),
 
                   onTap: () {
-                    // صفحه نمایش متن دعا را بعداً اینجا باز می‌کنیم
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => DuaScreen(dua: dua)),
+                    );
                   },
+
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+
+                    child: Row(
+                      textDirection: TextDirection.rtl,
+
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+
+                          decoration: BoxDecoration(
+                            color: const Color(0xff00695c).withOpacity(0.12),
+
+                            shape: BoxShape.circle,
+                          ),
+
+                          child: const Icon(
+                            Icons.auto_stories_rounded,
+                            color: Color(0xff00695c),
+                            size: 28,
+                          ),
+                        ),
+
+                        const SizedBox(width: 15),
+
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+
+                            children: [
+                              Text(
+                                dua.title,
+
+                                textDirection: TextDirection.rtl,
+
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              const Text(
+                                'برای مطالعه دعا لمس کنید',
+
+                                textDirection: TextDirection.rtl,
+
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: 10),
+
+                        const Icon(
+                          Icons.arrow_back_ios_rounded,
+                          size: 18,
+                          color: Color(0xff00695c),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },
