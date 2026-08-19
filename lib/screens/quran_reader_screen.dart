@@ -1,49 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../models/ziyarat.dart';
-import '../services/favorite_service.dart';
+import '../models/quran.dart';
+import '../widgets/favorite_button.dart';
 import '../widgets/theme_toggle_button.dart';
 
-class ZiyaratScreen extends StatefulWidget {
-  final Ziyarat ziyarat;
+class QuranReaderScreen extends StatefulWidget {
+  final QuranSurah surah;
 
-  const ZiyaratScreen({super.key, required this.ziyarat});
+  const QuranReaderScreen({super.key, required this.surah});
 
   @override
-  State<ZiyaratScreen> createState() => _ZiyaratScreenState();
+  State<QuranReaderScreen> createState() => _QuranReaderScreenState();
 }
 
-class _ZiyaratScreenState extends State<ZiyaratScreen> {
+class _QuranReaderScreenState extends State<QuranReaderScreen> {
   bool showTranslation = true;
-  bool isFavorite = false;
-
-  final FavoriteService _favoriteService = FavoriteService();
-
-  @override
-  void initState() {
-    super.initState();
-    _loadFavorite();
-  }
-
-  Future<void> _loadFavorite() async {
-    final result = await _favoriteService.isFavorite(widget.ziyarat.id);
-
-    if (mounted) {
-      setState(() {
-        isFavorite = result;
-      });
-    }
-  }
-
-  Future<void> _toggleFavorite() async {
-    final result = await _favoriteService.toggleFavorite(widget.ziyarat.id);
-
-    if (mounted) {
-      setState(() {
-        isFavorite = result;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,20 +25,11 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.ziyarat.title),
+        title: Text(widget.surah.name),
         centerTitle: true,
 
         actions: [
-          IconButton(
-            tooltip: 'علاقه‌مندی',
-            onPressed: _toggleFavorite,
-            icon: Icon(
-              isFavorite
-                  ? Icons.favorite_rounded
-                  : Icons.favorite_border_rounded,
-              color: isFavorite ? Colors.red : Colors.white,
-            ),
-          ),
+          FavoriteButton(id: widget.surah.id, size: 25),
 
           const ThemeToggleButton(),
 
@@ -82,18 +44,18 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
 
           children: [
-            const Text(
-              'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ',
+            Text(
+              widget.surah.arabicName,
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 24,
+              style: const TextStyle(
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
                 height: 2,
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
 
             Container(
               decoration: BoxDecoration(
@@ -136,16 +98,29 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
 
             const SizedBox(height: 25),
 
-            ...widget.ziyarat.sections.map((section) => _buildSection(section)),
+            const Text(
+              'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ',
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                height: 2,
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            ...widget.surah.verses.map((verse) => _buildVerse(verse)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSection(ZiyaratSection section) {
+  Widget _buildVerse(QuranVerse verse) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 22),
 
       padding: const EdgeInsets.all(20),
 
@@ -159,25 +134,52 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
 
         children: [
           Text(
-            section.arabic,
+            verse.arabic,
             textDirection: TextDirection.rtl,
             textAlign: TextAlign.justify,
             style: const TextStyle(
-              fontSize: 22,
-              height: 2.2,
+              fontSize: 23,
+              height: 2.3,
               fontWeight: FontWeight.w500,
             ),
           ),
 
-          if (showTranslation && section.translation.trim().isNotEmpty) ...[
+          const SizedBox(height: 10),
+
+          Align(
+            alignment: Alignment.centerLeft,
+
+            child: Container(
+              width: 32,
+              height: 32,
+
+              decoration: BoxDecoration(
+                color: const Color(0xff008f7a).withValues(alpha: 0.16),
+                shape: BoxShape.circle,
+              ),
+
+              alignment: Alignment.center,
+
+              child: Text(
+                '${verse.number}',
+                style: const TextStyle(
+                  color: Color(0xff39b9a4),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+
+          if (showTranslation && verse.translation.trim().isNotEmpty) ...[
             const SizedBox(height: 15),
 
             Divider(color: const Color(0xff39b9a4).withValues(alpha: 0.3)),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
 
             Text(
-              section.translation,
+              verse.translation,
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.justify,
               style: const TextStyle(fontSize: 17, height: 2),

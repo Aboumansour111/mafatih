@@ -60,6 +60,7 @@ flutter:
     - lib/data/duas.json
     - lib/data/categories.json
     - lib/data/ziyarat.json
+    - lib/data/quran.json
     
     
 

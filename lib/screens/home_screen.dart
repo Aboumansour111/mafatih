@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/category.dart';
 import '../services/content_service.dart';
 import '../widgets/category_card.dart';
+import '../widgets/theme_toggle_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,7 +11,12 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('مفاتیح یمانی'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('مفاتیح یمانی'),
+        centerTitle: true,
+
+        actions: const [ThemeToggleButton()],
+      ),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

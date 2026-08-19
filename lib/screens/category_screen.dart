@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../models/category.dart';
 import '../models/dua.dart';
+import '../models/quran.dart';
 import '../models/ziyarat.dart';
 import '../services/content_service.dart';
 import '../services/favorite_service.dart';
+import '../utils/app_routes.dart';
+import '../widgets/favorite_button.dart';
+import '../widgets/theme_toggle_button.dart';
 import 'dua_screen.dart';
+import 'quran_reader_screen.dart';
 import 'ziyarat_screen.dart';
 
 class CategoryScreen extends StatefulWidget {
@@ -19,7 +24,6 @@ class CategoryScreen extends StatefulWidget {
 
 class _CategoryScreenState extends State<CategoryScreen> {
   final ContentService _contentService = ContentService();
-  final FavoriteService _favoriteService = FavoriteService();
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +40,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.category.title), centerTitle: true),
+      appBar: AppBar(
+        title: Text(widget.category.title),
+        centerTitle: true,
+        actions: const [ThemeToggleButton(), SizedBox(width: 8)],
+      ),
       body: const Center(
         child: Text(
           'محتوای این بخش به‌زودی اضافه می‌شود.',
@@ -52,53 +60,57 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   Widget _buildFavoriteScreen() {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.category.title), centerTitle: true),
-      body: FutureBuilder<Set<String>>(
-        future: _favoriteService.getFavorites(),
-        builder: (context, favoriteSnapshot) {
-          if (favoriteSnapshot.connectionState == ConnectionState.waiting) {
+      appBar: AppBar(
+        title: Text(widget.category.title),
+        centerTitle: true,
+        actions: const [ThemeToggleButton(), SizedBox(width: 8)],
+      ),
+
+      body: FutureBuilder<List<dynamic>>(
+        future: _loadAllContent(),
+
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (favoriteSnapshot.hasError) {
+          if (snapshot.hasError) {
             return Center(
-              child: Text(
-                'خطا در بارگذاری علاقه‌مندی‌ها\n\n'
-                '${favoriteSnapshot.error}',
-                textAlign: TextAlign.center,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'خطا در بارگذاری علاقه‌مندی‌ها\n\n'
+                  '${snapshot.error}',
+                  textAlign: TextAlign.center,
+                ),
               ),
             );
           }
 
-          final favoriteIds = favoriteSnapshot.data ?? <String>{};
+          final allContent = snapshot.data ?? [];
 
-          if (favoriteIds.isEmpty) {
-            return const Center(
-              child: Text(
-                'هنوز محتوایی به علاقه‌مندی‌ها اضافه نشده است.',
-                style: TextStyle(fontSize: 16),
-              ),
-            );
-          }
+          return FutureBuilder<Set<String>>(
+            future: _getFavoriteIds(),
 
-          return FutureBuilder<List<dynamic>>(
-            future: _loadAllContent(),
-            builder: (context, contentSnapshot) {
-              if (contentSnapshot.connectionState == ConnectionState.waiting) {
+            builder: (context, favoriteSnapshot) {
+              if (favoriteSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (contentSnapshot.hasError) {
+              if (favoriteSnapshot.hasError) {
                 return Center(
-                  child: Text(
-                    'خطا در بارگذاری محتوا\n\n'
-                    '${contentSnapshot.error}',
-                    textAlign: TextAlign.center,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      'خطا در بارگذاری علاقه‌مندی‌ها\n\n'
+                      '${favoriteSnapshot.error}',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 );
               }
 
-              final allContent = contentSnapshot.data ?? [];
+              final favoriteIds = favoriteSnapshot.data ?? <String>{};
 
               final favoriteContent = allContent
                   .where((item) => favoriteIds.contains(_getContentId(item)))
@@ -107,7 +119,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               if (favoriteContent.isEmpty) {
                 return const Center(
                   child: Text(
-                    'محتوای ذخیره‌شده پیدا نشد.',
+                    'هنوز محتوایی به علاقه‌مندی‌ها اضافه نشده است.',
                     style: TextStyle(fontSize: 16),
                   ),
                 );
@@ -116,21 +128,20 @@ class _CategoryScreenState extends State<CategoryScreen> {
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: favoriteContent.length,
+
                 itemBuilder: (context, index) {
                   final item = favoriteContent[index];
 
                   if (item is Dua) {
                     return _buildContentCard(
-                      context: context,
                       id: item.id,
                       title: item.title,
                       icon: Icons.auto_stories_rounded,
+
                       onTap: () async {
                         await Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => DuaScreen(dua: item),
-                          ),
+                          AppRoutes.slide(DuaScreen(dua: item)),
                         );
 
                         if (mounted) {
@@ -142,16 +153,34 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
                   if (item is Ziyarat) {
                     return _buildContentCard(
-                      context: context,
                       id: item.id,
                       title: item.title,
                       icon: Icons.mosque_rounded,
+
                       onTap: () async {
                         await Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => ZiyaratScreen(ziyarat: item),
-                          ),
+                          AppRoutes.slide(ZiyaratScreen(ziyarat: item)),
+                        );
+
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                    );
+                  }
+
+                  if (item is QuranSurah) {
+                    return _buildContentCard(
+                      id: item.id,
+                      title: item.name,
+                      icon: Icons.menu_book_rounded,
+                      subtitle: '${item.versesCount} آیه',
+
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          AppRoutes.slide(QuranReaderScreen(surah: item)),
                         );
 
                         if (mounted) {
@@ -171,12 +200,31 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
+  // ==========================================================
+  // دریافت علاقه‌مندی‌ها
+  // ==========================================================
+
+  Future<Set<String>> _getFavoriteIds() async {
+    final service = await FavoriteServiceHelper.create();
+
+    return service;
+  }
+
+  // ==========================================================
+  // بارگذاری تمام محتوا
+  // ==========================================================
+
   Future<List<dynamic>> _loadAllContent() async {
     final duas = await _contentService.loadDuas();
     final ziyarat = await _contentService.loadZiyarat();
+    final quran = await _contentService.loadQuran();
 
-    return [...duas, ...ziyarat];
+    return [...duas, ...ziyarat, ...quran];
   }
+
+  // ==========================================================
+  // شناسه محتوا
+  // ==========================================================
 
   String _getContentId(dynamic item) {
     if (item is Dua) {
@@ -184,6 +232,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
     }
 
     if (item is Ziyarat) {
+      return item.id;
+    }
+
+    if (item is QuranSurah) {
       return item.id;
     }
 
@@ -196,9 +248,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   Widget _buildDuasScreen() {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.category.title), centerTitle: true),
+      appBar: AppBar(
+        title: Text(widget.category.title),
+        centerTitle: true,
+        actions: const [ThemeToggleButton(), SizedBox(width: 8)],
+      ),
+
       body: FutureBuilder<List<Dua>>(
         future: _contentService.loadDuas(),
+
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -235,18 +293,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: categoryDuas.length,
+
             itemBuilder: (context, index) {
               final dua = categoryDuas[index];
 
               return _buildContentCard(
-                context: context,
                 id: dua.id,
                 title: dua.title,
                 icon: Icons.auto_stories_rounded,
+
                 onTap: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => DuaScreen(dua: dua)),
+                    AppRoutes.slide(DuaScreen(dua: dua)),
                   );
 
                   if (mounted) {
@@ -267,9 +326,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   Widget _buildZiyaratScreen() {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.category.title), centerTitle: true),
+      appBar: AppBar(
+        title: Text(widget.category.title),
+        centerTitle: true,
+        actions: const [ThemeToggleButton(), SizedBox(width: 8)],
+      ),
+
       body: FutureBuilder<List<Ziyarat>>(
         future: _contentService.loadZiyarat(),
+
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -306,20 +371,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: categoryZiyarat.length,
+
             itemBuilder: (context, index) {
               final item = categoryZiyarat[index];
 
               return _buildContentCard(
-                context: context,
                 id: item.id,
                 title: item.title,
                 icon: Icons.mosque_rounded,
+
                 onTap: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => ZiyaratScreen(ziyarat: item),
-                    ),
+                    AppRoutes.slide(ZiyaratScreen(ziyarat: item)),
                   );
 
                   if (mounted) {
@@ -339,108 +403,117 @@ class _CategoryScreenState extends State<CategoryScreen> {
   // ==========================================================
 
   Widget _buildContentCard({
-    required BuildContext context,
     required String id,
     required String title,
     required IconData icon,
     required VoidCallback onTap,
+    String subtitle = 'برای مطالعه لمس کنید',
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final cardColor = isDark ? const Color(0xff0b2925) : Colors.white;
+
+    final iconColor = isDark
+        ? const Color(0xff39b9a4)
+        : const Color(0xff00695c);
+
+    final iconBackground = isDark
+        ? const Color(0xff008f7a).withValues(alpha: 0.18)
+        : const Color(0xff00695c).withValues(alpha: 0.12);
+
+    final subtitleColor = isDark ? const Color(0xffa9bbb6) : Colors.grey;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
+
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(22),
+
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
             blurRadius: 12,
             offset: const Offset(0, 5),
           ),
         ],
       ),
+
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
         onTap: onTap,
+
         child: Padding(
           padding: const EdgeInsets.all(18),
+
           child: Row(
             textDirection: TextDirection.rtl,
+
             children: [
-              // آیکون محتوا
               Container(
                 padding: const EdgeInsets.all(12),
+
                 decoration: BoxDecoration(
-                  color: const Color(0xff00695c).withValues(alpha: 0.12),
+                  color: iconBackground,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: const Color(0xff00695c), size: 28),
+
+                child: Icon(icon, color: iconColor, size: 28),
               ),
 
               const SizedBox(width: 15),
 
-              // عنوان
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
+
                   children: [
                     Text(
                       title,
                       textDirection: TextDirection.rtl,
+
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+
                     const SizedBox(height: 6),
-                    const Text(
-                      'برای مطالعه لمس کنید',
+
+                    Text(
+                      subtitle,
                       textDirection: TextDirection.rtl,
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
+
+                      style: TextStyle(fontSize: 13, color: subtitleColor),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
 
-              // قلب
-              FutureBuilder<bool>(
-                future: _favoriteService.isFavorite(id),
-                builder: (context, snapshot) {
-                  final isFavorite = snapshot.data ?? false;
+              FavoriteButton(id: id, size: 27),
 
-                  return IconButton(
-                    tooltip: isFavorite
-                        ? 'حذف از علاقه‌مندی‌ها'
-                        : 'افزودن به علاقه‌مندی‌ها',
-                    onPressed: () async {
-                      await _favoriteService.toggleFavorite(id);
+              const SizedBox(width: 4),
 
-                      if (mounted) {
-                        setState(() {});
-                      }
-                    },
-                    icon: Icon(
-                      isFavorite
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      color: isFavorite ? Colors.red : Colors.grey,
-                      size: 27,
-                    ),
-                  );
-                },
-              ),
-
-              // فلش
-              const Icon(
-                Icons.arrow_back_ios_rounded,
-                size: 18,
-                color: Color(0xff00695c),
-              ),
+              Icon(Icons.arrow_back_ios_rounded, size: 18, color: iconColor),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+// ==========================================================
+// دسترسی ساده به FavoriteService
+// ==========================================================
+
+class FavoriteServiceHelper {
+  static Future<Set<String>> create() async {
+    final service = FavoriteService();
+
+    return service.getFavorites();
   }
 }

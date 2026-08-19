@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/dua.dart';
 import '../services/favorite_service.dart';
+import '../widgets/theme_toggle_button.dart';
 
 class DuaScreen extends StatefulWidget {
   final Dua dua;
@@ -46,11 +47,15 @@ class _DuaScreenState extends State<DuaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final surfaceColor = isDark ? const Color(0xff0b2925) : Colors.white;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.dua.title),
         centerTitle: true,
-
         actions: [
           IconButton(
             tooltip: 'علاقه‌مندی',
@@ -62,6 +67,10 @@ class _DuaScreenState extends State<DuaScreen> {
               color: isFavorite ? Colors.red : Colors.white,
             ),
           ),
+
+          const ThemeToggleButton(),
+
+          const SizedBox(width: 8),
         ],
       ),
 
@@ -76,8 +85,16 @@ class _DuaScreenState extends State<DuaScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
 
               decoration: BoxDecoration(
-                color: const Color(0xff00695c).withValues(alpha: 0.08),
+                color: surfaceColor,
                 borderRadius: BorderRadius.circular(16),
+
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
 
               child: Row(
@@ -131,7 +148,7 @@ class _DuaScreenState extends State<DuaScreen> {
       padding: const EdgeInsets.all(20),
 
       decoration: BoxDecoration(
-        color: const Color(0xff00695c).withValues(alpha: 0.05),
+        color: const Color(0xff00695c).withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
       ),
 
@@ -153,7 +170,7 @@ class _DuaScreenState extends State<DuaScreen> {
           if (showTranslation && section.translation.trim().isNotEmpty) ...[
             const SizedBox(height: 18),
 
-            Divider(color: const Color(0xff00695c).withValues(alpha: 0.2)),
+            Divider(color: const Color(0xff39b9a4).withValues(alpha: 0.3)),
 
             const SizedBox(height: 14),
 

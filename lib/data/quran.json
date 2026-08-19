@@ -1,0 +1,20 @@
+[
+  {
+    "number": 36,
+    "name": "یس",
+    "arabicName": "يس",
+    "versesCount": 83,
+    "verses": [
+      {
+        "number": 1,
+        "arabic": "يس",
+        "translation": "یس"
+      },
+      {
+        "number": 2,
+        "arabic": "وَالْقُرْآنِ الْحَكِيمِ",
+        "translation": "سوگند به قرآن حکیم."
+      }
+    ]
+  }
+]
