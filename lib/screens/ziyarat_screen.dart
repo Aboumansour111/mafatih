@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../models/dua.dart';
+import '../models/ziyarat.dart';
 import '../services/favorite_service.dart';
 
-class DuaScreen extends StatefulWidget {
-  final Dua dua;
+class ZiyaratScreen extends StatefulWidget {
+  final Ziyarat ziyarat;
 
-  const DuaScreen({super.key, required this.dua});
+  const ZiyaratScreen({super.key, required this.ziyarat});
 
   @override
-  State<DuaScreen> createState() => _DuaScreenState();
+  State<ZiyaratScreen> createState() => _ZiyaratScreenState();
 }
 
-class _DuaScreenState extends State<DuaScreen> {
+class _ZiyaratScreenState extends State<ZiyaratScreen> {
   bool showTranslation = true;
   bool isFavorite = false;
 
@@ -25,7 +25,7 @@ class _DuaScreenState extends State<DuaScreen> {
   }
 
   Future<void> _loadFavorite() async {
-    final result = await _favoriteService.isFavorite(widget.dua.id);
+    final result = await _favoriteService.isFavorite(widget.ziyarat.id);
 
     if (mounted) {
       setState(() {
@@ -35,7 +35,7 @@ class _DuaScreenState extends State<DuaScreen> {
   }
 
   Future<void> _toggleFavorite() async {
-    final result = await _favoriteService.toggleFavorite(widget.dua.id);
+    final result = await _favoriteService.toggleFavorite(widget.ziyarat.id);
 
     if (mounted) {
       setState(() {
@@ -48,7 +48,7 @@ class _DuaScreenState extends State<DuaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.dua.title),
+        title: Text(widget.ziyarat.title),
         centerTitle: true,
 
         actions: [
@@ -72,38 +72,6 @@ class _DuaScreenState extends State<DuaScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
 
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-
-              decoration: BoxDecoration(
-                color: const Color(0xff00695c).withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(16),
-              ),
-
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                children: [
-                  const Text(
-                    'نمایش ترجمه',
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-
-                  Switch(
-                    value: showTranslation,
-                    onChanged: (value) {
-                      setState(() {
-                        showTranslation = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
             const Text(
               'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ',
               textDirection: TextDirection.rtl,
@@ -115,18 +83,59 @@ class _DuaScreenState extends State<DuaScreen> {
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+
+              child: SwitchListTile(
+                value: showTranslation,
+
+                onChanged: (value) {
+                  setState(() {
+                    showTranslation = value;
+                  });
+                },
+
+                title: const Text(
+                  'نمایش ترجمه',
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+
+                secondary: const Icon(
+                  Icons.translate_rounded,
+                  color: Color(0xff00695c),
+                ),
+
+                activeThumbColor: const Color(0xff00695c),
+              ),
+            ),
+
             const SizedBox(height: 25),
 
-            ...widget.dua.sections.map((section) => _buildSection(section)),
+            ...widget.ziyarat.sections.map((section) => _buildSection(section)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSection(DuaSection section) {
+  Widget _buildSection(ZiyaratSection section) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: const EdgeInsets.only(bottom: 20),
 
       padding: const EdgeInsets.all(20),
 
@@ -151,7 +160,7 @@ class _DuaScreenState extends State<DuaScreen> {
           ),
 
           if (showTranslation && section.translation.trim().isNotEmpty) ...[
-            const SizedBox(height: 18),
+            const SizedBox(height: 15),
 
             Divider(color: const Color(0xff00695c).withValues(alpha: 0.2)),
 
