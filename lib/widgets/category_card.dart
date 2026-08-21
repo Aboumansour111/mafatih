@@ -4,13 +4,36 @@ import '../models/category.dart';
 import '../screens/category_screen.dart';
 import '../screens/quran_screen.dart';
 
-class CategoryCard extends StatelessWidget {
+class CategoryCard extends StatefulWidget {
   final Category category;
 
-  const CategoryCard({
-    super.key,
-    required this.category,
-  });
+  const CategoryCard({super.key, required this.category});
+
+  @override
+  State<CategoryCard> createState() => _CategoryCardState();
+}
+
+class _CategoryCardState extends State<CategoryCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+      lowerBound: 0.0,
+      upperBound: 0.04,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   IconData _getIcon(String icon) {
     switch (icon) {
@@ -30,17 +53,37 @@ class CategoryCard extends StatelessWidget {
         return Icons.favorite_rounded;
 
       default:
-        return Icons.more_horiz_rounded;
+        return Icons.auto_awesome_rounded;
     }
   }
 
-  void _openCategory(BuildContext context) {
-    if (category.id == 'quran') {
+  String _getSubtitle(String icon) {
+    switch (icon) {
+      case 'dua':
+        return 'دعا و نیایش';
+
+      case 'calendar':
+        return 'اعمال و مناسبت‌ها';
+
+      case 'mosque':
+        return 'زیارات';
+
+      case 'quran':
+        return 'قرآن کریم';
+
+      case 'favorite':
+        return 'ذخیره‌شده‌ها';
+
+      default:
+        return 'مطالعه و نیایش';
+    }
+  }
+
+  void _openCategory() {
+    if (widget.category.id == 'quran') {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => const QuranScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const QuranScreen()),
       );
 
       return;
@@ -49,9 +92,7 @@ class CategoryCard extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CategoryScreen(
-          category: category,
-        ),
+        builder: (_) => CategoryScreen(category: widget.category),
       ),
     );
   }
@@ -59,104 +100,234 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final isDark = theme.brightness == Brightness.dark;
 
-    // ==========================================================
-    // رنگ‌های کارت
-    // ==========================================================
+    final primary = colorScheme.primary;
 
-    final cardColor = isDark
-        ? const Color(0xff0b2925)
-        : Colors.white;
+    return AnimatedBuilder(
+      animation: _controller,
 
-    final titleColor = isDark
-        ? const Color(0xfff1f7f5)
-        : const Color(0xff222222);
+      builder: (context, child) {
+        final scale = 1.0 - _controller.value;
 
-    final iconColor = isDark
-        ? const Color(0xff4db6a5)
-        : const Color(0xff00695c);
+        return Transform.scale(scale: scale, child: child);
+      },
 
-    final iconBackgroundColor = isDark
-        ? const Color(0xff008f7a).withValues(alpha: 0.18)
-        : const Color(0xff00695c).withValues(alpha: 0.10);
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
 
-    // ==========================================================
-    // کارت
-    // ==========================================================
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-
-        borderRadius: BorderRadius.circular(24),
-
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: isDark ? 0.28 : 0.06,
-            ),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
+            colors: isDark
+                ? [
+                    colorScheme.surfaceContainerHigh,
+                    colorScheme.surfaceContainer,
+                  ]
+                : [Colors.white, const Color(0xfff4faf8)],
           ),
-        ],
-      ),
 
-      child: Material(
-        color: Colors.transparent,
+          border: Border.all(
+            color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
+          ),
 
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: primary.withValues(alpha: isDark ? 0.10 : 0.07),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
 
-          onTap: () {
-            _openCategory(context);
-          },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
 
-          child: Padding(
-            padding: const EdgeInsets.all(20),
+          child: Material(
+            color: Colors.transparent,
 
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: InkWell(
+              onTap: _openCategory,
 
-              children: [
-                // ==================================================
-                // آیکون
-                // ==================================================
+              onTapDown: (_) {
+                _controller.forward();
+              },
 
-                Container(
-                  padding: const EdgeInsets.all(15),
+              onTapCancel: () {
+                _controller.reverse();
+              },
 
-                  decoration: BoxDecoration(
-                    color: iconBackgroundColor,
-                    shape: BoxShape.circle,
+              onTapUp: (_) {
+                _controller.reverse();
+              },
+
+              splashColor: primary.withValues(alpha: 0.10),
+              highlightColor: primary.withValues(alpha: 0.04),
+
+              child: Stack(
+                children: [
+                  // =================================================
+                  // دایره‌های تزئینی
+                  // =================================================
+
+                  Positioned(
+                    left: -28,
+                    bottom: -28,
+
+                    child: Container(
+                      width: 105,
+                      height: 105,
+
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+
+                        border: Border.all(
+                          color: primary.withValues(alpha: 0.06),
+                          width: 2,
+                        ),
+                      ),
+                    ),
                   ),
 
-                  child: Icon(
-                    _getIcon(category.icon),
-                    size: 35,
-                    color: iconColor,
+                  Positioned(
+                    right: -32,
+                    top: -32,
+
+                    child: Container(
+                      width: 90,
+                      height: 90,
+
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+
+                        color: primary.withValues(alpha: 0.025),
+                      ),
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 15),
+                  // =================================================
+                  // محتوای کارت
+                  // =================================================
+                  Padding(
+                    padding: const EdgeInsets.all(17),
 
-                // ==================================================
-                // عنوان
-                // ==================================================
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
 
-                Text(
-                  category.title,
+                      children: [
+                        // =================================================
+                        // آیکون
+                        // =================================================
 
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.center,
+                        Align(
+                          alignment: Alignment.centerRight,
 
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: titleColor,
+                          child: Container(
+                            width: 58,
+                            height: 58,
+
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(19),
+
+                              gradient: LinearGradient(
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+
+                                colors: [
+                                  primary.withValues(alpha: 0.18),
+                                  primary.withValues(alpha: 0.07),
+                                ],
+                              ),
+
+                              border: Border.all(
+                                color: primary.withValues(alpha: 0.10),
+                              ),
+                            ),
+
+                            child: Icon(
+                              _getIcon(widget.category.icon),
+                              size: 30,
+                              color: primary,
+                            ),
+                          ),
+                        ),
+
+                        const Spacer(),
+
+                        // =================================================
+                        // عنوان
+                        // =================================================
+                        Text(
+                          widget.category.title,
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.right,
+
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            height: 1.5,
+                          ),
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        // =================================================
+                        // توضیح
+                        // =================================================
+                        Text(
+                          _getSubtitle(widget.category.icon),
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.right,
+
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 11.5,
+                            height: 1.5,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // =================================================
+                        // خط و فلش
+                        // =================================================
+                        Row(
+                          children: [
+                            Container(
+                              width: 30,
+                              height: 3,
+
+                              decoration: BoxDecoration(
+                                color: primary.withValues(alpha: 0.35),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+
+                            const Spacer(),
+
+                            Icon(
+                              Icons.arrow_back_rounded,
+                              size: 19,
+                              color: primary.withValues(alpha: 0.75),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
