@@ -4,22 +4,37 @@ import '../models/category.dart';
 import '../services/content_service.dart';
 import '../widgets/category_card.dart';
 import '../widgets/theme_toggle_button.dart';
+import 'favorites_screen.dart';
+import 'search_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  void _openSearch(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const SearchScreen()),
+    );
+  }
+
+  void _openFavorites(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-    final primary = theme.colorScheme.primary;
+    final colorScheme = theme.colorScheme;
+    final primary = colorScheme.primary;
 
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
-
           slivers: [
             // =====================================================
             // هدر
@@ -28,17 +43,13 @@ class HomeScreen extends StatelessWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
-
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(20, 18, 14, 22),
-
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
-
                     gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
-
                       colors: [
                         primary,
                         Color.lerp(
@@ -51,7 +62,6 @@ class HomeScreen extends StatelessWidget {
                             primary,
                       ],
                     ),
-
                     boxShadow: [
                       BoxShadow(
                         color: primary.withValues(alpha: 0.25),
@@ -60,18 +70,18 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   child: Stack(
                     children: [
+                      // =================================================
                       // نقش تزئینی
+                      // =================================================
+
                       Positioned(
                         left: -35,
                         top: -35,
-
                         child: Container(
                           width: 125,
                           height: 125,
-
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
@@ -85,11 +95,9 @@ class HomeScreen extends StatelessWidget {
                       Positioned(
                         left: 20,
                         bottom: -55,
-
                         child: Container(
                           width: 105,
                           height: 105,
-
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
@@ -102,14 +110,16 @@ class HomeScreen extends StatelessWidget {
 
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-
                         children: [
+                          // =================================================
+                          // دکمه‌های بالای هدر
+                          // =================================================
+
                           Row(
                             children: [
                               Container(
                                 width: 48,
                                 height: 48,
-
                                 decoration: BoxDecoration(
                                   color: Colors.white.withValues(alpha: 0.14),
                                   borderRadius: BorderRadius.circular(16),
@@ -117,7 +127,6 @@ class HomeScreen extends StatelessWidget {
                                     color: Colors.white.withValues(alpha: 0.12),
                                   ),
                                 ),
-
                                 child: const Icon(
                                   Icons.auto_awesome_rounded,
                                   color: Colors.white,
@@ -127,17 +136,57 @@ class HomeScreen extends StatelessWidget {
 
                               const Spacer(),
 
-                              const ThemeToggleButton(),
+                              // =================================================
+                              // علاقه‌مندی‌ها
+                              // =================================================
+                              _buildHeaderButton(
+                                context: context,
+                                icon: Icons.favorite_rounded,
+                                tooltip: 'علاقه‌مندی‌ها',
+                                onPressed: () => _openFavorites(context),
+                              ),
+
+                              const SizedBox(width: 8),
+
+                              // =================================================
+                              // جستجو
+                              // =================================================
+                              _buildHeaderButton(
+                                context: context,
+                                icon: Icons.search_rounded,
+                                tooltip: 'جستجو',
+                                onPressed: () => _openSearch(context),
+                              ),
+
+                              const SizedBox(width: 8),
+
+                              // =================================================
+                              // تغییر تم
+                              // =================================================
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.10),
+                                  ),
+                                ),
+                                child: const ThemeToggleButton(),
+                              ),
                             ],
                           ),
 
                           const SizedBox(height: 18),
 
+                          // =================================================
+                          // عنوان
+                          // =================================================
                           const Text(
                             'مَفاتیح یمانی',
                             textDirection: TextDirection.rtl,
                             textAlign: TextAlign.right,
-
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 29,
@@ -152,7 +201,6 @@ class HomeScreen extends StatelessWidget {
                             'همراهی برای لحظه‌های دعا و نیایش',
                             textDirection: TextDirection.rtl,
                             textAlign: TextAlign.right,
-
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.78),
                               fontSize: 14,
@@ -178,15 +226,12 @@ class HomeScreen extends StatelessWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-
                 child: Row(
                   textDirection: TextDirection.rtl,
-
                   children: [
                     Container(
                       width: 5,
                       height: 28,
-
                       decoration: BoxDecoration(
                         color: primary,
                         borderRadius: BorderRadius.circular(10),
@@ -198,14 +243,12 @@ class HomeScreen extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
-
                         children: [
                           Text(
                             'دسترسی سریع',
                             textDirection: TextDirection.rtl,
-
                             style: TextStyle(
-                              color: theme.colorScheme.onSurface,
+                              color: colorScheme.onSurface,
                               fontSize: 21,
                               fontWeight: FontWeight.w800,
                             ),
@@ -216,9 +259,8 @@ class HomeScreen extends StatelessWidget {
                           Text(
                             'محتوای مورد نیاز خود را انتخاب کنید',
                             textDirection: TextDirection.rtl,
-
                             style: TextStyle(
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                           ),
@@ -237,16 +279,13 @@ class HomeScreen extends StatelessWidget {
             // =====================================================
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 30),
-
               sliver: FutureBuilder<List<Category>>(
                 future: ContentService().loadCategories(),
-
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 80),
-
                         child: Center(child: CircularProgressIndicator()),
                       ),
                     );
@@ -256,18 +295,15 @@ class HomeScreen extends StatelessWidget {
                     return SliverToBoxAdapter(
                       child: Container(
                         padding: const EdgeInsets.all(20),
-
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
+                          color: colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(20),
                         ),
-
                         child: Text(
                           'خطا در بارگذاری دسته‌بندی‌ها\n\n${snapshot.error}',
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.center,
-
-                          style: TextStyle(color: theme.colorScheme.onSurface),
+                          style: TextStyle(color: colorScheme.onSurface),
                         ),
                       ),
                     );
@@ -279,14 +315,12 @@ class HomeScreen extends StatelessWidget {
                     return SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.all(40),
-
                         child: Text(
                           'هنوز محتوایی اضافه نشده است.',
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.center,
-
                           style: TextStyle(
-                            color: theme.colorScheme.onSurfaceVariant,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 15,
                           ),
                         ),
@@ -298,14 +332,11 @@ class HomeScreen extends StatelessWidget {
                     delegate: SliverChildBuilderDelegate((context, index) {
                       return CategoryCard(category: categories[index]);
                     }, childCount: categories.length),
-
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-
                           childAspectRatio: 0.98,
                         ),
                   );
@@ -319,16 +350,12 @@ class HomeScreen extends StatelessWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.only(left: 20, right: 20, bottom: 30),
-
                 child: Text(
                   'مفاتیح یمانی',
                   textDirection: TextDirection.rtl,
                   textAlign: TextAlign.center,
-
                   style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.55,
-                    ),
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
                     fontSize: 12,
                   ),
                 ),
@@ -336,6 +363,32 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ==========================================================
+  // دکمه‌های هدر
+  // ==========================================================
+
+  Widget _buildHeaderButton({
+    required BuildContext context,
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+      ),
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.white, size: 23),
       ),
     );
   }
