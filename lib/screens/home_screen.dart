@@ -4,8 +4,8 @@ import '../models/category.dart';
 import '../services/content_service.dart';
 import '../widgets/category_card.dart';
 import '../widgets/theme_toggle_button.dart';
-import 'favorites_screen.dart';
 import 'search_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,10 +17,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _openFavorites(BuildContext context) {
+  void _openSettings(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+      MaterialPageRoute(builder: (_) => const SettingsScreen()),
     );
   }
 
@@ -28,8 +28,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final colorScheme = theme.colorScheme;
-    final primary = colorScheme.primary;
+    final primary = theme.colorScheme.primary;
 
     return Scaffold(
       body: SafeArea(
@@ -73,7 +72,7 @@ class HomeScreen extends StatelessWidget {
                   child: Stack(
                     children: [
                       // =================================================
-                      // نقش تزئینی
+                      // نقش‌های تزئینی
                       // =================================================
 
                       Positioned(
@@ -117,6 +116,10 @@ class HomeScreen extends StatelessWidget {
 
                           Row(
                             children: [
+                              // =================================================
+                              // آیکون برنامه
+                              // =================================================
+
                               Container(
                                 width: 48,
                                 height: 48,
@@ -137,13 +140,27 @@ class HomeScreen extends StatelessWidget {
                               const Spacer(),
 
                               // =================================================
-                              // علاقه‌مندی‌ها
+                              // تنظیمات
                               // =================================================
-                              _buildHeaderButton(
-                                context: context,
-                                icon: Icons.favorite_rounded,
-                                tooltip: 'علاقه‌مندی‌ها',
-                                onPressed: () => _openFavorites(context),
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.10),
+                                  ),
+                                ),
+                                child: IconButton(
+                                  tooltip: 'تنظیمات',
+                                  onPressed: () => _openSettings(context),
+                                  icon: const Icon(
+                                    Icons.settings_rounded,
+                                    color: Colors.white,
+                                    size: 22,
+                                  ),
+                                ),
                               ),
 
                               const SizedBox(width: 8),
@@ -151,11 +168,25 @@ class HomeScreen extends StatelessWidget {
                               // =================================================
                               // جستجو
                               // =================================================
-                              _buildHeaderButton(
-                                context: context,
-                                icon: Icons.search_rounded,
-                                tooltip: 'جستجو',
-                                onPressed: () => _openSearch(context),
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.10),
+                                  ),
+                                ),
+                                child: IconButton(
+                                  tooltip: 'جستجو',
+                                  onPressed: () => _openSearch(context),
+                                  icon: const Icon(
+                                    Icons.search_rounded,
+                                    color: Colors.white,
+                                    size: 23,
+                                  ),
+                                ),
                               ),
 
                               const SizedBox(width: 8),
@@ -248,7 +279,7 @@ class HomeScreen extends StatelessWidget {
                             'دسترسی سریع',
                             textDirection: TextDirection.rtl,
                             style: TextStyle(
-                              color: colorScheme.onSurface,
+                              color: theme.colorScheme.onSurface,
                               fontSize: 21,
                               fontWeight: FontWeight.w800,
                             ),
@@ -260,7 +291,7 @@ class HomeScreen extends StatelessWidget {
                             'محتوای مورد نیاز خود را انتخاب کنید',
                             textDirection: TextDirection.rtl,
                             style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                           ),
@@ -296,14 +327,14 @@ class HomeScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerHighest,
+                          color: theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           'خطا در بارگذاری دسته‌بندی‌ها\n\n${snapshot.error}',
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: colorScheme.onSurface),
+                          style: TextStyle(color: theme.colorScheme.onSurface),
                         ),
                       ),
                     );
@@ -320,7 +351,7 @@ class HomeScreen extends StatelessWidget {
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
+                            color: theme.colorScheme.onSurfaceVariant,
                             fontSize: 15,
                           ),
                         ),
@@ -355,7 +386,9 @@ class HomeScreen extends StatelessWidget {
                   textDirection: TextDirection.rtl,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.55,
+                    ),
                     fontSize: 12,
                   ),
                 ),
@@ -363,32 +396,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // ==========================================================
-  // دکمه‌های هدر
-  // ==========================================================
-
-  Widget _buildHeaderButton({
-    required BuildContext context,
-    required IconData icon,
-    required String tooltip,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-      ),
-      child: IconButton(
-        tooltip: tooltip,
-        onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white, size: 23),
       ),
     );
   }

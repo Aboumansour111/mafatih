@@ -1,38 +1,44 @@
-class ZiyaratSection {
+class AmalSection {
   final String arabic;
   final String translation;
 
-  ZiyaratSection({required this.arabic, required this.translation});
+  AmalSection({required this.arabic, required this.translation});
 
-  factory ZiyaratSection.fromJson(Map<String, dynamic> json) {
-    return ZiyaratSection(
+  factory AmalSection.fromJson(Map<String, dynamic> json) {
+    return AmalSection(
       arabic: json['arabic'] ?? '',
       translation: json['translation'] ?? '',
     );
   }
 }
 
-class Ziyarat {
+class Amal {
   final String id;
   final String title;
   final String category;
-  final List<ZiyaratSection> sections;
+  final String type;
+  final List<AmalSection> sections;
+  final String source;
 
-  Ziyarat({
+  Amal({
     required this.id,
     required this.title,
     required this.category,
+    required this.type,
     required this.sections,
+    required this.source,
   });
 
-  factory Ziyarat.fromJson(Map<String, dynamic> json) {
-    return Ziyarat(
+  factory Amal.fromJson(Map<String, dynamic> json) {
+    return Amal(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       category: json['category'] ?? '',
+      type: json['type'] ?? '',
       sections: (json['sections'] as List<dynamic>? ?? [])
-          .map((item) => ZiyaratSection.fromJson(item))
+          .map((item) => AmalSection.fromJson(item))
           .toList(),
+      source: json['source'] ?? '',
     );
   }
 }

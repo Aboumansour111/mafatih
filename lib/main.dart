@@ -63,10 +63,6 @@ class _MafatihAppState extends State<MafatihApp> {
     );
   }
 
-  // ==========================================================
-  // حالت روشن
-  // ==========================================================
-
   ThemeData _lightTheme() {
     return ThemeData(
       useMaterial3: true,
@@ -78,7 +74,11 @@ class _MafatihAppState extends State<MafatihApp> {
 
       scaffoldBackgroundColor: const Color(0xfffaf6ef),
 
-      textTheme: GoogleFonts.vazirmatnTextTheme(),
+      textTheme: GoogleFonts.vazirmatnTextTheme().apply(
+        fontFamily: _themeService.fontFamily,
+      ),
+
+      fontFamily: _themeService.fontFamily,
 
       appBarTheme: const AppBarTheme(
         centerTitle: true,
@@ -93,33 +93,16 @@ class _MafatihAppState extends State<MafatihApp> {
     );
   }
 
-  // ==========================================================
-  // حالت تاریک - سبز یشمی
-  // ==========================================================
-
   ThemeData _darkTheme() {
-    // پس زمینه اصلی برنامه
     const background = Color(0xff102824);
-
-    // سطح کارت‌ها و پنل‌ها
     const surface = Color(0xff18352f);
-
-    // سطح روشن‌تر برای کارت‌های برجسته
     const surfaceVariant = Color(0xff20423a);
 
-    // سبز اصلی
     const primary = Color(0xff26a69a);
-
-    // سبز روشن برای عناصر فعال
     const primaryLight = Color(0xff4db6ac);
 
-    // متن اصلی
     const textPrimary = Color(0xfff1f7f4);
-
-    // متن ثانویه / ترجمه
     const textSecondary = Color(0xffc5d8d2);
-
-    // متن کم‌رنگ
     const textMuted = Color(0xff91aaa3);
 
     return ThemeData(
@@ -143,20 +126,17 @@ class _MafatihAppState extends State<MafatihApp> {
         onError: Colors.white,
       ),
 
-      // --------------------------------------------------------
-      // پس زمینه اصلی
-      // --------------------------------------------------------
       scaffoldBackgroundColor: background,
 
-      // --------------------------------------------------------
-      // فونت
-      // --------------------------------------------------------
       textTheme: GoogleFonts.vazirmatnTextTheme(ThemeData.dark().textTheme)
-          .apply(bodyColor: textPrimary, displayColor: textPrimary),
+          .apply(
+            bodyColor: textPrimary,
+            displayColor: textPrimary,
+            fontFamily: _themeService.fontFamily,
+          ),
 
-      // --------------------------------------------------------
-      // AppBar
-      // --------------------------------------------------------
+      fontFamily: _themeService.fontFamily,
+
       appBarTheme: const AppBarTheme(
         centerTitle: true,
 
@@ -177,24 +157,12 @@ class _MafatihAppState extends State<MafatihApp> {
         iconTheme: IconThemeData(color: textPrimary),
       ),
 
-      // --------------------------------------------------------
-      // کارت‌ها
-      // --------------------------------------------------------
       cardColor: surface,
 
-      // --------------------------------------------------------
-      // Divider
-      // --------------------------------------------------------
       dividerColor: primary.withValues(alpha: 0.28),
 
-      // --------------------------------------------------------
-      // Icon
-      // --------------------------------------------------------
       iconTheme: const IconThemeData(color: Color(0xffb8d5ce)),
 
-      // --------------------------------------------------------
-      // Switch
-      // --------------------------------------------------------
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -221,9 +189,6 @@ class _MafatihAppState extends State<MafatihApp> {
         }),
       ),
 
-      // --------------------------------------------------------
-      // Input / سطح‌های مختلف
-      // --------------------------------------------------------
       inputDecorationTheme: const InputDecorationTheme(
         filled: true,
 
@@ -232,9 +197,6 @@ class _MafatihAppState extends State<MafatihApp> {
         hintStyle: TextStyle(color: textMuted),
       ),
 
-      // --------------------------------------------------------
-      // ListTile
-      // --------------------------------------------------------
       listTileTheme: const ListTileThemeData(
         tileColor: surface,
 
@@ -245,17 +207,11 @@ class _MafatihAppState extends State<MafatihApp> {
         subtitleTextStyle: TextStyle(color: textSecondary),
       ),
 
-      // --------------------------------------------------------
-      // BottomSheet
-      // --------------------------------------------------------
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: surface,
         surfaceTintColor: Colors.transparent,
       ),
 
-      // --------------------------------------------------------
-      // Dialog
-      // --------------------------------------------------------
       dialogTheme: const DialogThemeData(
         backgroundColor: surface,
 
@@ -270,18 +226,12 @@ class _MafatihAppState extends State<MafatihApp> {
         contentTextStyle: TextStyle(color: textSecondary, fontSize: 16),
       ),
 
-      // --------------------------------------------------------
-      // SnackBar
-      // --------------------------------------------------------
       snackBarTheme: const SnackBarThemeData(
         backgroundColor: Color(0xff23443d),
 
         contentTextStyle: TextStyle(color: textPrimary),
       ),
 
-      // --------------------------------------------------------
-      // Floating Action Button
-      // --------------------------------------------------------
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: primary,
         foregroundColor: Colors.white,
@@ -289,10 +239,6 @@ class _MafatihAppState extends State<MafatihApp> {
     );
   }
 }
-
-// ==========================================================
-// دسترسی سراسری به ThemeService
-// ==========================================================
 
 class ThemeScope extends InheritedWidget {
   final ThemeService themeService;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/quran.dart';
 import '../widgets/favorite_button.dart';
+import '../widgets/font_size_controls.dart';
 import '../widgets/theme_toggle_button.dart';
 
 class QuranReaderScreen extends StatefulWidget {
@@ -16,6 +17,28 @@ class QuranReaderScreen extends StatefulWidget {
 class _QuranReaderScreenState extends State<QuranReaderScreen> {
   bool showTranslation = true;
 
+  double fontSize = 23;
+
+  static const double minFontSize = 17;
+  static const double maxFontSize = 32;
+  static const double fontStep = 1;
+
+  void _increaseFontSize() {
+    if (fontSize < maxFontSize) {
+      setState(() {
+        fontSize += fontStep;
+      });
+    }
+  }
+
+  void _decreaseFontSize() {
+    if (fontSize > minFontSize) {
+      setState(() {
+        fontSize -= fontStep;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -28,7 +51,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
-
           slivers: [
             // =========================================================
             // هدر
@@ -41,7 +63,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                   padding: const EdgeInsets.fromLTRB(18, 16, 12, 20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(28),
-
                     gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
@@ -57,7 +78,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                             primary,
                       ],
                     ),
-
                     boxShadow: [
                       BoxShadow(
                         color: primary.withValues(alpha: 0.22),
@@ -66,13 +86,8 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                       ),
                     ],
                   ),
-
                   child: Stack(
                     children: [
-                      // -------------------------------------------------
-                      // تزئینات
-                      // -------------------------------------------------
-
                       Positioned(
                         left: -45,
                         top: -45,
@@ -105,9 +120,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // -------------------------------------------------
+                          // =================================================
                           // دکمه‌های بالا
-                          // -------------------------------------------------
+                          // =================================================
 
                           Row(
                             children: [
@@ -130,6 +145,16 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
                               const Spacer(),
 
+                              // اندازه فونت
+                              FontSizeControls(
+                                onIncrease: _increaseFontSize,
+                                onDecrease: _decreaseFontSize,
+                                canIncrease: fontSize < maxFontSize,
+                                canDecrease: fontSize > minFontSize,
+                              ),
+
+                              const SizedBox(width: 4),
+
                               FavoriteButton(id: widget.surah.id, size: 25),
 
                               const SizedBox(width: 2),
@@ -140,9 +165,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
                           const SizedBox(height: 20),
 
-                          // -------------------------------------------------
-                          // عنوان
-                          // -------------------------------------------------
                           Text(
                             widget.surah.name,
                             textDirection: TextDirection.rtl,
@@ -178,9 +200,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                                 icon: Icons.format_list_numbered_rounded,
                                 text: '${widget.surah.versesCount} آیه',
                               ),
-
                               const SizedBox(width: 8),
-
                               _buildHeaderChip(
                                 icon: Icons.auto_awesome_rounded,
                                 text: 'قرآن کریم',
@@ -208,14 +228,11 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                     horizontal: 16,
                     vertical: 6,
                   ),
-
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(20),
-
                     border: Border.all(color: primary.withValues(alpha: 0.08)),
                   ),
-
                   child: Row(
                     textDirection: TextDirection.rtl,
                     children: [
@@ -248,9 +265,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-
                             const SizedBox(height: 2),
-
                             Text(
                               showTranslation
                                   ? 'ترجمه نمایش داده می‌شود'
@@ -297,7 +312,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                             color: primary.withValues(alpha: 0.20),
                           ),
                         ),
-
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           child: Icon(
@@ -306,7 +320,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                             size: 17,
                           ),
                         ),
-
                         Expanded(
                           child: Divider(
                             color: primary.withValues(alpha: 0.20),
@@ -323,7 +336,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: colorScheme.onSurface,
-                        fontSize: 22,
+                        fontSize: fontSize,
                         fontWeight: FontWeight.w700,
                         height: 2,
                       ),
@@ -338,7 +351,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                             color: primary.withValues(alpha: 0.20),
                           ),
                         ),
-
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           child: Icon(
@@ -347,7 +359,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                             size: 17,
                           ),
                         ),
-
                         Expanded(
                           child: Divider(
                             color: primary.withValues(alpha: 0.20),
@@ -367,7 +378,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
             // =========================================================
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 35),
-
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final verse = widget.surah.verses[index];
@@ -382,27 +392,19 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     );
   }
 
-  // =========================================================
-  // چیپ هدر
-  // =========================================================
-
   Widget _buildHeaderChip({required IconData icon, required String text}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.11),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
       ),
-
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 15),
-
           const SizedBox(width: 5),
-
           Text(
             text,
             textDirection: TextDirection.rtl,
@@ -417,10 +419,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     );
   }
 
-  // =========================================================
-  // آیه
-  // =========================================================
-
   Widget _buildVerse(QuranVerse verse, int index) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -430,28 +428,17 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
-
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(
-          alpha: isDark ? 0.72 : 0.72,
-        ),
-
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(24),
-
         border: Border.all(
           color: primary.withValues(alpha: isDark ? 0.10 : 0.07),
         ),
       ),
-
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
-
         child: Stack(
           children: [
-            // =====================================================
-            // نقش تزئینی
-            // =====================================================
-
             Positioned(
               left: -32,
               bottom: -32,
@@ -470,23 +457,16 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-
                 children: [
-                  // =================================================
-                  // متن عربی
-                  // =================================================
-
                   Text(
                     verse.arabic,
                     textDirection: TextDirection.rtl,
                     textAlign: TextAlign.justify,
-
                     style: TextStyle(
                       color: colorScheme.onSurface,
-                      fontSize: 23,
+                      fontSize: fontSize,
                       height: 2.35,
                       fontWeight: FontWeight.w500,
                     ),
@@ -494,18 +474,13 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
                   const SizedBox(height: 14),
 
-                  // =================================================
-                  // شماره آیه
-                  // =================================================
                   Row(
                     children: [
                       Container(
                         width: 34,
                         height: 34,
-
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-
                           gradient: LinearGradient(
                             begin: Alignment.topRight,
                             end: Alignment.bottomLeft,
@@ -514,14 +489,11 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                               primary.withValues(alpha: 0.07),
                             ],
                           ),
-
                           border: Border.all(
                             color: primary.withValues(alpha: 0.15),
                           ),
                         ),
-
                         alignment: Alignment.center,
-
                         child: Text(
                           '${verse.number}',
                           style: TextStyle(
@@ -551,29 +523,23 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                     ],
                   ),
 
-                  // =================================================
-                  // ترجمه
-                  // =================================================
                   if (showTranslation &&
                       verse.translation.trim().isNotEmpty) ...[
                     const SizedBox(height: 14),
 
                     Container(
                       padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
-
                       decoration: BoxDecoration(
                         color: primary.withValues(alpha: 0.045),
                         borderRadius: BorderRadius.circular(16),
                       ),
-
                       child: Text(
                         verse.translation,
                         textDirection: TextDirection.rtl,
                         textAlign: TextAlign.justify,
-
                         style: TextStyle(
                           color: colorScheme.onSurfaceVariant,
-                          fontSize: 16,
+                          fontSize: fontSize * 0.70,
                           height: 2.05,
                           fontWeight: FontWeight.w400,
                         ),

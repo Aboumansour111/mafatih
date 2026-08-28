@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/amal.dart';
 import '../models/category.dart';
 import '../models/dua.dart';
 import '../models/quran.dart';
@@ -9,6 +10,7 @@ import '../services/favorite_service.dart';
 import '../utils/app_routes.dart';
 import '../widgets/favorite_button.dart';
 import '../widgets/theme_toggle_button.dart';
+import 'amal_screen.dart';
 import 'dua_screen.dart';
 import 'quran_reader_screen.dart';
 import 'ziyarat_screen.dart';
@@ -33,6 +35,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
     if (widget.category.id == 'duas') {
       return _buildDuasScreen();
+    }
+
+    if (widget.category.id == 'amal') {
+      return _buildAmalScreen();
     }
 
     if (widget.category.id == 'ziyarat') {
@@ -65,10 +71,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
         centerTitle: true,
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
-
       body: FutureBuilder<List<dynamic>>(
         future: _loadAllContent(),
-
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -91,7 +95,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
           return FutureBuilder<Set<String>>(
             future: _getFavoriteIds(),
-
             builder: (context, favoriteSnapshot) {
               if (favoriteSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -112,9 +115,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
               final favoriteIds = favoriteSnapshot.data ?? <String>{};
 
-              final favoriteContent = allContent
-                  .where((item) => favoriteIds.contains(_getContentId(item)))
-                  .toList();
+              final favoriteContent = allContent.where((item) {
+                return favoriteIds.contains(_getContentFavoriteId(item));
+              }).toList();
 
               if (favoriteContent.isEmpty) {
                 return const Center(
@@ -128,16 +131,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: favoriteContent.length,
-
                 itemBuilder: (context, index) {
                   final item = favoriteContent[index];
 
                   if (item is Dua) {
                     return _buildContentCard(
-                      id: item.id,
+                      id: FavoriteService().duaId(item.id),
                       title: item.title,
                       icon: Icons.auto_stories_rounded,
-
                       onTap: () async {
                         await Navigator.push(
                           context,
@@ -151,12 +152,29 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     );
                   }
 
+                  if (item is Amal) {
+                    return _buildContentCard(
+                      id: FavoriteService().amalId(item.id),
+                      title: item.title,
+                      icon: Icons.calendar_month_rounded,
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          AppRoutes.slide(AmalScreen(amal: item)),
+                        );
+
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                    );
+                  }
+
                   if (item is Ziyarat) {
                     return _buildContentCard(
-                      id: item.id,
+                      id: FavoriteService().ziyaratId(item.id),
                       title: item.title,
                       icon: Icons.mosque_rounded,
-
                       onTap: () async {
                         await Navigator.push(
                           context,
@@ -176,7 +194,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       title: item.name,
                       icon: Icons.menu_book_rounded,
                       subtitle: '${item.versesCount} آیه',
-
                       onTap: () async {
                         await Navigator.push(
                           context,
@@ -201,13 +218,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 
   // ==========================================================
-  // دریافت علاقه‌مندی‌ها
+  // علاقه‌مندی‌ها
   // ==========================================================
 
   Future<Set<String>> _getFavoriteIds() async {
-    final service = await FavoriteServiceHelper.create();
+    final service = FavoriteService();
 
-    return service;
+    return service.getFavorites();
   }
 
   // ==========================================================
@@ -216,23 +233,30 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   Future<List<dynamic>> _loadAllContent() async {
     final duas = await _contentService.loadDuas();
+    final amals = await _contentService.loadAmals();
     final ziyarat = await _contentService.loadZiyarat();
     final quran = await _contentService.loadQuran();
 
-    return [...duas, ...ziyarat, ...quran];
+    return [...duas, ...amals, ...ziyarat, ...quran];
   }
 
   // ==========================================================
-  // شناسه محتوا
+  // شناسه علاقه‌مندی
   // ==========================================================
 
-  String _getContentId(dynamic item) {
+  String _getContentFavoriteId(dynamic item) {
+    final service = FavoriteService();
+
     if (item is Dua) {
-      return item.id;
+      return service.duaId(item.id);
+    }
+
+    if (item is Amal) {
+      return service.amalId(item.id);
     }
 
     if (item is Ziyarat) {
-      return item.id;
+      return service.ziyaratId(item.id);
     }
 
     if (item is QuranSurah) {
@@ -253,10 +277,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
         centerTitle: true,
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
-
       body: FutureBuilder<List<Dua>>(
         future: _contentService.loadDuas(),
-
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -293,19 +315,91 @@ class _CategoryScreenState extends State<CategoryScreen> {
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: categoryDuas.length,
-
             itemBuilder: (context, index) {
               final dua = categoryDuas[index];
 
               return _buildContentCard(
-                id: dua.id,
+                id: FavoriteService().duaId(dua.id),
                 title: dua.title,
                 icon: Icons.auto_stories_rounded,
-
                 onTap: () async {
                   await Navigator.push(
                     context,
                     AppRoutes.slide(DuaScreen(dua: dua)),
+                  );
+
+                  if (mounted) {
+                    setState(() {});
+                  }
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  // ==========================================================
+  // اعمال
+  // ==========================================================
+
+  Widget _buildAmalScreen() {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.category.title),
+        centerTitle: true,
+        actions: const [ThemeToggleButton(), SizedBox(width: 8)],
+      ),
+      body: FutureBuilder<List<Amal>>(
+        future: _contentService.loadAmals(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'خطا در بارگذاری اعمال\n\n'
+                  '${snapshot.error}',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
+
+          final amals = snapshot.data ?? [];
+
+          final categoryAmals = amals
+              .where((amal) => amal.category == widget.category.id)
+              .toList();
+
+          if (categoryAmals.isEmpty) {
+            return const Center(
+              child: Text(
+                'هنوز عملی برای این بخش اضافه نشده است.',
+                style: TextStyle(fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: categoryAmals.length,
+            itemBuilder: (context, index) {
+              final amal = categoryAmals[index];
+
+              return _buildContentCard(
+                id: FavoriteService().amalId(amal.id),
+                title: amal.title,
+                icon: Icons.calendar_month_rounded,
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    AppRoutes.slide(AmalScreen(amal: amal)),
                   );
 
                   if (mounted) {
@@ -331,10 +425,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
         centerTitle: true,
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
-
       body: FutureBuilder<List<Ziyarat>>(
         future: _contentService.loadZiyarat(),
-
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -371,15 +463,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: categoryZiyarat.length,
-
             itemBuilder: (context, index) {
               final item = categoryZiyarat[index];
 
               return _buildContentCard(
-                id: item.id,
+                id: FavoriteService().ziyaratId(item.id),
                 title: item.title,
                 icon: Icons.mosque_rounded,
-
                 onTap: () async {
                   await Navigator.push(
                     context,
@@ -426,11 +516,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
-
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(22),
-
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
@@ -439,26 +527,20 @@ class _CategoryScreenState extends State<CategoryScreen> {
           ),
         ],
       ),
-
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
         onTap: onTap,
-
         child: Padding(
           padding: const EdgeInsets.all(18),
-
           child: Row(
             textDirection: TextDirection.rtl,
-
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-
                 decoration: BoxDecoration(
                   color: iconBackground,
                   shape: BoxShape.circle,
                 ),
-
                 child: Icon(icon, color: iconColor, size: 28),
               ),
 
@@ -467,12 +549,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
-
                   children: [
                     Text(
                       title,
                       textDirection: TextDirection.rtl,
-
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -484,7 +564,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     Text(
                       subtitle,
                       textDirection: TextDirection.rtl,
-
                       style: TextStyle(fontSize: 13, color: subtitleColor),
                     ),
                   ],
@@ -503,17 +582,5 @@ class _CategoryScreenState extends State<CategoryScreen> {
         ),
       ),
     );
-  }
-}
-
-// ==========================================================
-// دسترسی ساده به FavoriteService
-// ==========================================================
-
-class FavoriteServiceHelper {
-  static Future<Set<String>> create() async {
-    final service = FavoriteService();
-
-    return service.getFavorites();
   }
 }

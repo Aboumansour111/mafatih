@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import '../models/amal.dart';
 import '../models/category.dart';
 import '../models/dua.dart';
 import '../models/quran.dart';
@@ -14,6 +15,16 @@ class ContentService {
     final List<dynamic> jsonList = json.decode(jsonString);
 
     return jsonList.map((item) => Dua.fromJson(item)).toList();
+  }
+
+  Future<List<Amal>> loadAmals() async {
+    final String jsonString = await rootBundle.loadString(
+      'lib/data/amals.json',
+    );
+
+    final List<dynamic> jsonList = json.decode(jsonString);
+
+    return jsonList.map((item) => Amal.fromJson(item)).toList();
   }
 
   Future<List<Category>> loadCategories() async {
