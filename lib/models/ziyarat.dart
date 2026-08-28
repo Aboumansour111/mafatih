@@ -1,13 +1,19 @@
 class ZiyaratSection {
   final String arabic;
   final String translation;
+  final String? repeatLabel;
 
-  ZiyaratSection({required this.arabic, required this.translation});
+  ZiyaratSection({
+    required this.arabic,
+    required this.translation,
+    this.repeatLabel,
+  });
 
   factory ZiyaratSection.fromJson(Map<String, dynamic> json) {
     return ZiyaratSection(
       arabic: json['arabic'] ?? '',
       translation: json['translation'] ?? '',
+      repeatLabel: json['repeatLabel'],
     );
   }
 }
@@ -31,7 +37,7 @@ class Ziyarat {
       title: json['title'] ?? '',
       category: json['category'] ?? '',
       sections: (json['sections'] as List<dynamic>? ?? [])
-          .map((item) => ZiyaratSection.fromJson(item))
+          .map((item) => ZiyaratSection.fromJson(item as Map<String, dynamic>))
           .toList(),
     );
   }

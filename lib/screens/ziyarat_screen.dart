@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../models/ziyarat.dart';
 import '../services/favorite_service.dart';
@@ -8,7 +8,10 @@ import '../widgets/theme_toggle_button.dart';
 class ZiyaratScreen extends StatefulWidget {
   final Ziyarat ziyarat;
 
-  const ZiyaratScreen({super.key, required this.ziyarat});
+  const ZiyaratScreen({
+    super.key,
+    required this.ziyarat,
+  });
 
   @override
   State<ZiyaratScreen> createState() => _ZiyaratScreenState();
@@ -25,7 +28,6 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   @override
   void initState() {
     super.initState();
-
     _loadFavorite();
   }
 
@@ -34,7 +36,8 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   // ==========================================================
 
   Future<void> _loadFavorite() async {
-    final result = await _favoriteService.isZiyaratFavorite(widget.ziyarat.id);
+    final result =
+        await _favoriteService.isZiyaratFavorite(widget.ziyarat.id);
 
     if (!mounted) return;
 
@@ -44,9 +47,8 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   }
 
   Future<void> _toggleFavorite() async {
-    final result = await _favoriteService.toggleZiyaratFavorite(
-      widget.ziyarat.id,
-    );
+    final result =
+        await _favoriteService.toggleZiyaratFavorite(widget.ziyarat.id);
 
     if (!mounted) return;
 
@@ -100,15 +102,14 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
             onDecrease: _decreaseFontSize,
             onIncrease: _increaseFontSize,
           ),
-
-          _FavoriteButton(isFavorite: isFavorite, onPressed: _toggleFavorite),
-
+          _FavoriteButton(
+            isFavorite: isFavorite,
+            onPressed: _toggleFavorite,
+          ),
           const ThemeToggleButton(),
-
           const SizedBox(width: 8),
         ],
       ),
-
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -129,14 +130,17 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
 
                   const SizedBox(height: 30),
 
-                  ...List.generate(widget.ziyarat.sections.length, (index) {
-                    return _buildSection(
-                      widget.ziyarat.sections[index],
-                      index,
-                      colorScheme,
-                      isDark,
-                    );
-                  }),
+                  ...List.generate(
+                    widget.ziyarat.sections.length,
+                    (index) {
+                      return _buildSection(
+                        widget.ziyarat.sections[index],
+                        index,
+                        colorScheme,
+                        isDark,
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -150,7 +154,10 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   // هدر زیارت
   // ==========================================================
 
-  Widget _buildHeroHeader(ColorScheme colorScheme, bool isDark) {
+  Widget _buildHeroHeader(
+    ColorScheme colorScheme,
+    bool isDark,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(22, 25, 22, 26),
@@ -171,7 +178,9 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.22),
+            color: colorScheme.primary.withValues(
+              alpha: isDark ? 0.18 : 0.22,
+            ),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -194,7 +203,6 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
               ),
             ),
           ),
-
           Positioned(
             right: -35,
             bottom: -50,
@@ -207,7 +215,6 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
               ),
             ),
           ),
-
           Column(
             children: [
               Container(
@@ -226,9 +233,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                   size: 32,
                 ),
               ),
-
               const SizedBox(height: 17),
-
               Text(
                 widget.ziyarat.title,
                 textDirection: TextDirection.rtl,
@@ -242,9 +247,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                   height: 1.6,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 '${widget.ziyarat.sections.length} بخش',
                 textDirection: TextDirection.rtl,
@@ -265,7 +268,9 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   // کنترل ترجمه
   // ==========================================================
 
-  Widget _buildTranslationControl(ColorScheme colorScheme) {
+  Widget _buildTranslationControl(
+    ColorScheme colorScheme,
+  ) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       decoration: BoxDecoration(
@@ -298,9 +303,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
               size: 22,
             ),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -314,9 +317,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 2),
-
                 Text(
                   showTranslation
                       ? 'ترجمه در حال نمایش است'
@@ -330,9 +331,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
               ],
             ),
           ),
-
           const SizedBox(width: 8),
-
           Switch(
             value: showTranslation,
             onChanged: (value) {
@@ -350,7 +349,9 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   // بسم الله
   // ==========================================================
 
-  Widget _buildBismillah(ColorScheme colorScheme) {
+  Widget _buildBismillah(
+    ColorScheme colorScheme,
+  ) {
     return Column(
       children: [
         Row(
@@ -361,17 +362,13 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                 color: colorScheme.primary.withValues(alpha: 0.16),
               ),
             ),
-
             const SizedBox(width: 12),
-
             Icon(
               Icons.auto_awesome_rounded,
               size: 18,
               color: colorScheme.primary.withValues(alpha: 0.75),
             ),
-
             const SizedBox(width: 12),
-
             Expanded(
               child: Container(
                 height: 1,
@@ -380,9 +377,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
             ),
           ],
         ),
-
         const SizedBox(height: 14),
-
         Text(
           'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ',
           textDirection: TextDirection.rtl,
@@ -394,9 +389,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
             height: 2,
           ),
         ),
-
         const SizedBox(height: 14),
-
         Row(
           children: [
             Expanded(
@@ -405,17 +398,13 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                 color: colorScheme.primary.withValues(alpha: 0.16),
               ),
             ),
-
             const SizedBox(width: 12),
-
             Icon(
               Icons.auto_awesome_rounded,
               size: 12,
               color: colorScheme.primary.withValues(alpha: 0.55),
             ),
-
             const SizedBox(width: 12),
-
             Expanded(
               child: Container(
                 height: 1,
@@ -425,6 +414,52 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
           ],
         ),
       ],
+    );
+  }
+
+  // ==========================================================
+  // برچسب تکرار
+  // ==========================================================
+
+  Widget _buildRepeatLabel(
+    String label,
+    ColorScheme colorScheme,
+  ) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(18, 20, 18, 0),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.primary.withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        textDirection: TextDirection.rtl,
+        children: [
+          Icon(
+            Icons.repeat_rounded,
+            size: 20,
+            color: colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: colorScheme.primary,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -490,9 +525,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 9),
-
                     Text(
                       'بخش ${index + 1}',
                       textDirection: TextDirection.rtl,
@@ -502,9 +535,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-
                     const Spacer(),
-
                     Icon(
                       Icons.mosque_rounded,
                       size: 17,
@@ -513,6 +544,13 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                   ],
                 ),
               ),
+
+              if (section.repeatLabel != null &&
+                  section.repeatLabel!.trim().isNotEmpty)
+                _buildRepeatLabel(
+                  section.repeatLabel!,
+                  colorScheme,
+                ),
 
               Padding(
                 padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
@@ -558,9 +596,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                             size: 17,
                             color: colorScheme.primary,
                           ),
-
                           const SizedBox(width: 7),
-
                           Text(
                             'ترجمه',
                             textDirection: TextDirection.rtl,
@@ -572,9 +608,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 11),
-
                       Text(
                         section.translation,
                         textDirection: TextDirection.rtl,
@@ -605,23 +639,33 @@ class _FavoriteButton extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback onPressed;
 
-  const _FavoriteButton({required this.isFavorite, required this.onPressed});
+  const _FavoriteButton({
+    required this.isFavorite,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      tooltip: isFavorite ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها',
+      tooltip: isFavorite
+          ? 'حذف از علاقه‌مندی‌ها'
+          : 'افزودن به علاقه‌مندی‌ها',
       onPressed: onPressed,
       icon: AnimatedSwitcher(
         duration: const Duration(milliseconds: 220),
         transitionBuilder: (child, animation) {
           return ScaleTransition(
             scale: animation,
-            child: FadeTransition(opacity: animation, child: child),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
           );
         },
         child: Icon(
-          isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+          isFavorite
+              ? Icons.favorite_rounded
+              : Icons.favorite_border_rounded,
           key: ValueKey(isFavorite),
           color: isFavorite ? Colors.redAccent : Colors.white,
           size: 25,
