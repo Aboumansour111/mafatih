@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/quran.dart';
+import '../services/font_size_service.dart';
 import '../widgets/favorite_button.dart';
 import '../widgets/font_size_controls.dart';
 import '../widgets/theme_toggle_button.dart';
@@ -8,7 +9,10 @@ import '../widgets/theme_toggle_button.dart';
 class QuranReaderScreen extends StatefulWidget {
   final QuranSurah surah;
 
-  const QuranReaderScreen({super.key, required this.surah});
+  const QuranReaderScreen({
+    super.key,
+    required this.surah,
+  });
 
   @override
   State<QuranReaderScreen> createState() => _QuranReaderScreenState();
@@ -16,26 +20,43 @@ class QuranReaderScreen extends StatefulWidget {
 
 class _QuranReaderScreenState extends State<QuranReaderScreen> {
   bool showTranslation = true;
+  double fontSize = FontSizeService.defaultFontSize;
 
-  double fontSize = 23;
-
-  static const double minFontSize = 17;
-  static const double maxFontSize = 32;
   static const double fontStep = 1;
 
-  void _increaseFontSize() {
-    if (fontSize < maxFontSize) {
+  @override
+  void initState() {
+    super.initState();
+    _loadFontSize();
+  }
+
+  Future<void> _loadFontSize() async {
+    final savedSize = await FontSizeService.getQuranFontSize();
+
+    if (!mounted) return;
+
+    setState(() {
+      fontSize = savedSize;
+    });
+  }
+
+  Future<void> _increaseFontSize() async {
+    if (fontSize < FontSizeService.maxFontSize) {
       setState(() {
         fontSize += fontStep;
       });
+
+      await FontSizeService.setQuranFontSize(fontSize);
     }
   }
 
-  void _decreaseFontSize() {
-    if (fontSize > minFontSize) {
+  Future<void> _decreaseFontSize() async {
+    if (fontSize > FontSizeService.minFontSize) {
       setState(() {
         fontSize -= fontStep;
       });
+
+      await FontSizeService.setQuranFontSize(fontSize);
     }
   }
 
@@ -44,7 +65,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-
     final primary = colorScheme.primary;
 
     return Scaffold(
@@ -55,7 +75,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
             // =========================================================
             // هدر
             // =========================================================
-
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -103,7 +122,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                           ),
                         ),
                       ),
-
                       Positioned(
                         right: -35,
                         bottom: -55,
@@ -116,14 +134,12 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                           ),
                         ),
                       ),
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // =================================================
                           // دکمه‌های بالا
                           // =================================================
-
                           Row(
                             children: [
                               Container(
@@ -133,7 +149,8 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                                   color: Colors.white.withValues(alpha: 0.13),
                                   borderRadius: BorderRadius.circular(15),
                                   border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.10),
+                                    color:
+                                        Colors.white.withValues(alpha: 0.10),
                                   ),
                                 ),
                                 child: const Icon(
@@ -142,23 +159,24 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                                   size: 24,
                                 ),
                               ),
-
                               const Spacer(),
 
                               // اندازه فونت
                               FontSizeControls(
                                 onIncrease: _increaseFontSize,
                                 onDecrease: _decreaseFontSize,
-                                canIncrease: fontSize < maxFontSize,
-                                canDecrease: fontSize > minFontSize,
+                                canIncrease: fontSize <
+                                    FontSizeService.maxFontSize,
+                                canDecrease: fontSize >
+                                    FontSizeService.minFontSize,
                               ),
 
                               const SizedBox(width: 4),
-
-                              FavoriteButton(id: widget.surah.id, size: 25),
-
+                              FavoriteButton(
+                                id: widget.surah.id,
+                                size: 25,
+                              ),
                               const SizedBox(width: 2),
-
                               const ThemeToggleButton(),
                             ],
                           ),
@@ -215,7 +233,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 20),
+            ),
 
             // =========================================================
             // کنترل ترجمه
@@ -231,7 +251,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: primary.withValues(alpha: 0.08)),
+                    border: Border.all(
+                      color: primary.withValues(alpha: 0.08),
+                    ),
                   ),
                   child: Row(
                     textDirection: TextDirection.rtl,
@@ -249,9 +271,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                           size: 22,
                         ),
                       ),
-
                       const SizedBox(width: 12),
-
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -279,7 +299,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                           ],
                         ),
                       ),
-
                       Switch(
                         value: showTranslation,
                         onChanged: (value) {
@@ -295,7 +314,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 24),
+            ),
 
             // =========================================================
             // بسم الله
@@ -371,7 +392,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 24),
+            ),
 
             // =========================================================
             // آیات
@@ -379,11 +402,13 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 35),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final verse = widget.surah.verses[index];
-
-                  return _buildVerse(verse, index);
-                }, childCount: widget.surah.verses.length),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final verse = widget.surah.verses[index];
+                    return _buildVerse(verse, index);
+                  },
+                  childCount: widget.surah.verses.length,
+                ),
               ),
             ),
           ],
@@ -392,18 +417,30 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     );
   }
 
-  Widget _buildHeaderChip({required IconData icon, required String text}) {
+  Widget _buildHeaderChip({
+    required IconData icon,
+    required String text,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 6,
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.11),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.09),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 15),
+          Icon(
+            icon,
+            color: Colors.white.withValues(alpha: 0.85),
+            size: 15,
+          ),
           const SizedBox(width: 5),
           Text(
             text,
@@ -423,7 +460,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-
     final primary = colorScheme.primary;
 
     return Container(
@@ -432,7 +468,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
         color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: primary.withValues(alpha: isDark ? 0.10 : 0.07),
+          color: primary.withValues(
+            alpha: isDark ? 0.10 : 0.07,
+          ),
         ),
       ),
       child: ClipRRect(
@@ -507,7 +545,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                       const SizedBox(width: 10),
 
                       Expanded(
-                        child: Divider(color: primary.withValues(alpha: 0.13)),
+                        child: Divider(
+                          color: primary.withValues(alpha: 0.13),
+                        ),
                       ),
 
                       const SizedBox(width: 10),
@@ -528,7 +568,12 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                     const SizedBox(height: 14),
 
                     Container(
-                      padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+                      padding: const EdgeInsets.fromLTRB(
+                        14,
+                        13,
+                        14,
+                        13,
+                      ),
                       decoration: BoxDecoration(
                         color: primary.withValues(alpha: 0.045),
                         borderRadius: BorderRadius.circular(16),

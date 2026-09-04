@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/font_size_service.dart';
 import '../models/dua.dart';
 import '../services/favorite_service.dart';
 import '../widgets/font_size_controls.dart';
@@ -19,8 +20,8 @@ class _DuaScreenState extends State<DuaScreen>
   bool showTranslation = true;
   bool isFavorite = false;
 
-  // اندازه فونت فقط برای همین صفحه
-  double fontSize = 22;
+  // اندازه فونت
+  double fontSize = FontSizeService.defaultDuaFontSize;
 
   final FavoriteService _favoriteService = FavoriteService();
 
@@ -38,6 +39,7 @@ class _DuaScreenState extends State<DuaScreen>
     _animationController.forward();
 
     _loadFavorite();
+    _loadFontSize();
   }
 
   @override
@@ -71,23 +73,41 @@ class _DuaScreenState extends State<DuaScreen>
   }
 
   // ==========================================================
-  // تغییر اندازه فونت
+  // اندازه فونت
   // ==========================================================
 
-  void _decreaseFontSize() {
+  Future<void> _loadFontSize() async {
+    final savedFontSize = await FontSizeService.getDuaFontSize();
+
+    if (!mounted) return;
+
     setState(() {
-      if (fontSize > 18) {
-        fontSize -= 1;
-      }
+      fontSize = savedFontSize;
     });
   }
 
-  void _increaseFontSize() {
+  Future<void> _decreaseFontSize() async {
+    if (fontSize <= FontSizeService.minDuaFontSize) {
+      return;
+    }
+
     setState(() {
-      if (fontSize < 30) {
-        fontSize += 1;
-      }
+      fontSize -= 1;
     });
+
+    await FontSizeService.setDuaFontSize(fontSize);
+  }
+
+  Future<void> _increaseFontSize() async {
+    if (fontSize >= FontSizeService.maxDuaFontSize) {
+      return;
+    }
+
+    setState(() {
+      fontSize += 1;
+    });
+
+    await FontSizeService.setDuaFontSize(fontSize);
   }
 
   // ==========================================================
@@ -109,7 +129,6 @@ class _DuaScreenState extends State<DuaScreen>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-
     final background = theme.scaffoldBackgroundColor;
 
     return Scaffold(
@@ -123,20 +142,16 @@ class _DuaScreenState extends State<DuaScreen>
         centerTitle: true,
         actions: [
           FontSizeControls(
-            canDecrease: fontSize > 18,
-            canIncrease: fontSize < 30,
+            canDecrease: fontSize > FontSizeService.minDuaFontSize,
+            canIncrease: fontSize < FontSizeService.maxDuaFontSize,
             onDecrease: _decreaseFontSize,
             onIncrease: _increaseFontSize,
           ),
-
           _FavoriteButton(isFavorite: isFavorite, onPressed: _toggleFavorite),
-
           const ThemeToggleButton(),
-
           const SizedBox(width: 8),
         ],
       ),
-
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -146,17 +161,11 @@ class _DuaScreenState extends State<DuaScreen>
               child: Column(
                 children: [
                   _buildHeroHeader(context, colorScheme, isDark),
-
                   const SizedBox(height: 18),
-
                   _buildTranslationControl(context, colorScheme),
-
                   const SizedBox(height: 28),
-
                   _buildBismillah(context, colorScheme),
-
                   const SizedBox(height: 30),
-
                   ...List.generate(widget.dua.sections.length, (index) {
                     final section = widget.dua.sections[index];
 
@@ -229,7 +238,6 @@ class _DuaScreenState extends State<DuaScreen>
               ),
             ),
           ),
-
           Positioned(
             right: -35,
             bottom: -50,
@@ -242,7 +250,6 @@ class _DuaScreenState extends State<DuaScreen>
               ),
             ),
           ),
-
           Column(
             children: [
               Container(
@@ -261,9 +268,7 @@ class _DuaScreenState extends State<DuaScreen>
                   size: 31,
                 ),
               ),
-
               const SizedBox(height: 17),
-
               Text(
                 widget.dua.title,
                 textDirection: TextDirection.rtl,
@@ -277,9 +282,7 @@ class _DuaScreenState extends State<DuaScreen>
                   height: 1.6,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 '${widget.dua.sections.length} بخش',
                 textDirection: TextDirection.rtl,
@@ -336,9 +339,7 @@ class _DuaScreenState extends State<DuaScreen>
               size: 22,
             ),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -352,9 +353,7 @@ class _DuaScreenState extends State<DuaScreen>
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 2),
-
                 Text(
                   showTranslation
                       ? 'ترجمه در حال نمایش است'
@@ -368,9 +367,7 @@ class _DuaScreenState extends State<DuaScreen>
               ],
             ),
           ),
-
           const SizedBox(width: 8),
-
           Switch(value: showTranslation, onChanged: _toggleTranslation),
         ],
       ),
@@ -392,17 +389,13 @@ class _DuaScreenState extends State<DuaScreen>
                 color: colorScheme.primary.withValues(alpha: 0.16),
               ),
             ),
-
             const SizedBox(width: 12),
-
             Icon(
               Icons.auto_awesome_rounded,
               size: 18,
               color: colorScheme.primary.withValues(alpha: 0.75),
             ),
-
             const SizedBox(width: 12),
-
             Expanded(
               child: Container(
                 height: 1,
@@ -411,9 +404,7 @@ class _DuaScreenState extends State<DuaScreen>
             ),
           ],
         ),
-
         const SizedBox(height: 14),
-
         Text(
           'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ',
           textDirection: TextDirection.rtl,
@@ -425,9 +416,7 @@ class _DuaScreenState extends State<DuaScreen>
             height: 2,
           ),
         ),
-
         const SizedBox(height: 14),
-
         Row(
           children: [
             Expanded(
@@ -436,17 +425,13 @@ class _DuaScreenState extends State<DuaScreen>
                 color: colorScheme.primary.withValues(alpha: 0.16),
               ),
             ),
-
             const SizedBox(width: 12),
-
             Icon(
               Icons.auto_awesome_rounded,
               size: 12,
               color: colorScheme.primary.withValues(alpha: 0.55),
             ),
-
             const SizedBox(width: 12),
-
             Expanded(
               child: Container(
                 height: 1,
@@ -522,9 +507,7 @@ class _DuaScreenState extends State<DuaScreen>
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 9),
-
                     Text(
                       'بخش ${index + 1}',
                       textDirection: TextDirection.rtl,
@@ -534,9 +517,7 @@ class _DuaScreenState extends State<DuaScreen>
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-
                     const Spacer(),
-
                     Icon(
                       Icons.menu_book_rounded,
                       size: 17,
@@ -545,7 +526,6 @@ class _DuaScreenState extends State<DuaScreen>
                   ],
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
                 child: Text(
@@ -560,7 +540,6 @@ class _DuaScreenState extends State<DuaScreen>
                   ),
                 ),
               ),
-
               AnimatedCrossFade(
                 duration: const Duration(milliseconds: 300),
                 crossFadeState: hasTranslation
@@ -590,9 +569,7 @@ class _DuaScreenState extends State<DuaScreen>
                             size: 17,
                             color: colorScheme.primary,
                           ),
-
                           const SizedBox(width: 7),
-
                           Text(
                             'ترجمه',
                             textDirection: TextDirection.rtl,
@@ -604,9 +581,7 @@ class _DuaScreenState extends State<DuaScreen>
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 11),
-
                       Text(
                         section.translation,
                         textDirection: TextDirection.rtl,

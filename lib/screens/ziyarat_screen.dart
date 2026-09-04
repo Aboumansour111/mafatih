@@ -2,16 +2,14 @@
 
 import '../models/ziyarat.dart';
 import '../services/favorite_service.dart';
+import '../services/font_size_service.dart';
 import '../widgets/font_size_controls.dart';
 import '../widgets/theme_toggle_button.dart';
 
 class ZiyaratScreen extends StatefulWidget {
   final Ziyarat ziyarat;
 
-  const ZiyaratScreen({
-    super.key,
-    required this.ziyarat,
-  });
+  const ZiyaratScreen({super.key, required this.ziyarat});
 
   @override
   State<ZiyaratScreen> createState() => _ZiyaratScreenState();
@@ -21,7 +19,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   bool showTranslation = true;
   bool isFavorite = false;
 
-  double fontSize = 22;
+  double fontSize = FontSizeService.defaultFontSize;
 
   final FavoriteService _favoriteService = FavoriteService();
 
@@ -29,6 +27,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   void initState() {
     super.initState();
     _loadFavorite();
+    _loadFontSize();
   }
 
   // ==========================================================
@@ -36,8 +35,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   // ==========================================================
 
   Future<void> _loadFavorite() async {
-    final result =
-        await _favoriteService.isZiyaratFavorite(widget.ziyarat.id);
+    final result = await _favoriteService.isZiyaratFavorite(widget.ziyarat.id);
 
     if (!mounted) return;
 
@@ -47,8 +45,9 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   }
 
   Future<void> _toggleFavorite() async {
-    final result =
-        await _favoriteService.toggleZiyaratFavorite(widget.ziyarat.id);
+    final result = await _favoriteService.toggleZiyaratFavorite(
+      widget.ziyarat.id,
+    );
 
     if (!mounted) return;
 
@@ -58,23 +57,37 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   }
 
   // ==========================================================
-  // تغییر فونت
+  // اندازه فونت
   // ==========================================================
 
-  void _decreaseFontSize() {
+  Future<void> _loadFontSize() async {
+    final savedSize = await FontSizeService.getZiyaratFontSize();
+
+    if (!mounted) return;
+
     setState(() {
-      if (fontSize > 18) {
-        fontSize -= 1;
-      }
+      fontSize = savedSize;
     });
   }
 
-  void _increaseFontSize() {
-    setState(() {
-      if (fontSize < 30) {
+  Future<void> _decreaseFontSize() async {
+    if (fontSize > FontSizeService.minFontSize) {
+      setState(() {
+        fontSize -= 1;
+      });
+
+      await FontSizeService.setZiyaratFontSize(fontSize);
+    }
+  }
+
+  Future<void> _increaseFontSize() async {
+    if (fontSize < FontSizeService.maxFontSize) {
+      setState(() {
         fontSize += 1;
-      }
-    });
+      });
+
+      await FontSizeService.setZiyaratFontSize(fontSize);
+    }
   }
 
   // ==========================================================
@@ -97,15 +110,12 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
         centerTitle: true,
         actions: [
           FontSizeControls(
-            canDecrease: fontSize > 18,
-            canIncrease: fontSize < 30,
+            canDecrease: fontSize > FontSizeService.minFontSize,
+            canIncrease: fontSize < FontSizeService.maxFontSize,
             onDecrease: _decreaseFontSize,
             onIncrease: _increaseFontSize,
           ),
-          _FavoriteButton(
-            isFavorite: isFavorite,
-            onPressed: _toggleFavorite,
-          ),
+          _FavoriteButton(isFavorite: isFavorite, onPressed: _toggleFavorite),
           const ThemeToggleButton(),
           const SizedBox(width: 8),
         ],
@@ -119,28 +129,19 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
               child: Column(
                 children: [
                   _buildHeroHeader(colorScheme, isDark),
-
                   const SizedBox(height: 18),
-
                   _buildTranslationControl(colorScheme),
-
                   const SizedBox(height: 28),
-
                   _buildBismillah(colorScheme),
-
                   const SizedBox(height: 30),
-
-                  ...List.generate(
-                    widget.ziyarat.sections.length,
-                    (index) {
-                      return _buildSection(
-                        widget.ziyarat.sections[index],
-                        index,
-                        colorScheme,
-                        isDark,
-                      );
-                    },
-                  ),
+                  ...List.generate(widget.ziyarat.sections.length, (index) {
+                    return _buildSection(
+                      widget.ziyarat.sections[index],
+                      index,
+                      colorScheme,
+                      isDark,
+                    );
+                  }),
                 ],
               ),
             ),
@@ -154,10 +155,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   // هدر زیارت
   // ==========================================================
 
-  Widget _buildHeroHeader(
-    ColorScheme colorScheme,
-    bool isDark,
-  ) {
+  Widget _buildHeroHeader(ColorScheme colorScheme, bool isDark) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(22, 25, 22, 26),
@@ -178,9 +176,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withValues(
-              alpha: isDark ? 0.18 : 0.22,
-            ),
+            color: colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.22),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -268,9 +264,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   // کنترل ترجمه
   // ==========================================================
 
-  Widget _buildTranslationControl(
-    ColorScheme colorScheme,
-  ) {
+  Widget _buildTranslationControl(ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       decoration: BoxDecoration(
@@ -349,9 +343,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   // بسم الله
   // ==========================================================
 
-  Widget _buildBismillah(
-    ColorScheme colorScheme,
-  ) {
+  Widget _buildBismillah(ColorScheme colorScheme) {
     return Column(
       children: [
         Row(
@@ -384,7 +376,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: colorScheme.primary,
-            fontSize: 23,
+            fontSize: fontSize,
             fontWeight: FontWeight.w700,
             height: 2,
           ),
@@ -421,32 +413,20 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   // برچسب تکرار
   // ==========================================================
 
-  Widget _buildRepeatLabel(
-    String label,
-    ColorScheme colorScheme,
-  ) {
+  Widget _buildRepeatLabel(String label, ColorScheme colorScheme) {
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 20, 18, 0),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       decoration: BoxDecoration(
         color: colorScheme.primary.withValues(alpha: 0.09),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.primary.withValues(alpha: 0.18),
-        ),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         textDirection: TextDirection.rtl,
         children: [
-          Icon(
-            Icons.repeat_rounded,
-            size: 20,
-            color: colorScheme.primary,
-          ),
+          Icon(Icons.repeat_rounded, size: 20, color: colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             label,
@@ -547,10 +527,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
 
               if (section.repeatLabel != null &&
                   section.repeatLabel!.trim().isNotEmpty)
-                _buildRepeatLabel(
-                  section.repeatLabel!,
-                  colorScheme,
-                ),
+                _buildRepeatLabel(section.repeatLabel!, colorScheme),
 
               Padding(
                 padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
@@ -639,33 +616,23 @@ class _FavoriteButton extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback onPressed;
 
-  const _FavoriteButton({
-    required this.isFavorite,
-    required this.onPressed,
-  });
+  const _FavoriteButton({required this.isFavorite, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      tooltip: isFavorite
-          ? 'حذف از علاقه‌مندی‌ها'
-          : 'افزودن به علاقه‌مندی‌ها',
+      tooltip: isFavorite ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها',
       onPressed: onPressed,
       icon: AnimatedSwitcher(
         duration: const Duration(milliseconds: 220),
         transitionBuilder: (child, animation) {
           return ScaleTransition(
             scale: animation,
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
+            child: FadeTransition(opacity: animation, child: child),
           );
         },
         child: Icon(
-          isFavorite
-              ? Icons.favorite_rounded
-              : Icons.favorite_border_rounded,
+          isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
           key: ValueKey(isFavorite),
           color: isFavorite ? Colors.redAccent : Colors.white,
           size: 25,
