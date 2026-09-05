@@ -38,7 +38,6 @@ class HomeScreen extends StatelessWidget {
             // =====================================================
             // هدر
             // =====================================================
-
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
@@ -74,7 +73,6 @@ class HomeScreen extends StatelessWidget {
                       // =================================================
                       // نقش‌های تزئینی
                       // =================================================
-
                       Positioned(
                         left: -35,
                         top: -35,
@@ -113,29 +111,11 @@ class HomeScreen extends StatelessWidget {
                           // =================================================
                           // دکمه‌های بالای هدر
                           // =================================================
-
                           Row(
                             children: [
                               // =================================================
-                              // آیکون برنامه
+                              // آیکون برنامه حذف شد
                               // =================================================
-
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.14),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.12),
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.auto_awesome_rounded,
-                                  color: Colors.white,
-                                  size: 25,
-                                ),
-                              ),
 
                               const Spacer(),
 
@@ -249,7 +229,9 @@ class HomeScreen extends StatelessWidget {
             // =====================================================
             // فاصله
             // =====================================================
-            const SliverToBoxAdapter(child: SizedBox(height: 26)),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 26),
+            ),
 
             // =====================================================
             // عنوان بخش
@@ -303,7 +285,9 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 16),
+            ),
 
             // =====================================================
             // دسته‌بندی‌ها
@@ -317,7 +301,9 @@ class HomeScreen extends StatelessWidget {
                     return const SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 80),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
                       ),
                     );
                   }
@@ -327,14 +313,17 @@ class HomeScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
+                          color:
+                              theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           'خطا در بارگذاری دسته‌بندی‌ها\n\n${snapshot.error}',
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: theme.colorScheme.onSurface),
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
+                          ),
                         ),
                       ),
                     );
@@ -360,16 +349,21 @@ class HomeScreen extends StatelessWidget {
                   }
 
                   return SliverGrid(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return CategoryCard(category: categories[index]);
-                    }, childCount: categories.length),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        return CategoryCard(
+                          category: categories[index],
+                        );
+                      },
+                      childCount: categories.length,
+                    ),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 14,
-                          crossAxisSpacing: 14,
-                          childAspectRatio: 0.98,
-                        ),
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 14,
+                      crossAxisSpacing: 14,
+                      childAspectRatio: 0.98,
+                    ),
                   );
                 },
               ),
@@ -380,7 +374,11 @@ class HomeScreen extends StatelessWidget {
             // =====================================================
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 30),
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  bottom: 30,
+                ),
                 child: Text(
                   'مفاتیح یمانی',
                   textDirection: TextDirection.rtl,

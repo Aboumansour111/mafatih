@@ -21,10 +21,9 @@ class _DuaScreenState extends State<DuaScreen>
   bool isFavorite = false;
 
   // اندازه فونت
-  double fontSize = FontSizeService.defaultDuaFontSize;
+  double fontSize = FontSizeService.defaultFontSize;
 
   final FavoriteService _favoriteService = FavoriteService();
-
   late final AnimationController _animationController;
 
   @override
@@ -87,7 +86,7 @@ class _DuaScreenState extends State<DuaScreen>
   }
 
   Future<void> _decreaseFontSize() async {
-    if (fontSize <= FontSizeService.minDuaFontSize) {
+    if (fontSize <= FontSizeService.minFontSize) {
       return;
     }
 
@@ -99,7 +98,7 @@ class _DuaScreenState extends State<DuaScreen>
   }
 
   Future<void> _increaseFontSize() async {
-    if (fontSize >= FontSizeService.maxDuaFontSize) {
+    if (fontSize >= FontSizeService.maxFontSize) {
       return;
     }
 
@@ -142,8 +141,8 @@ class _DuaScreenState extends State<DuaScreen>
         centerTitle: true,
         actions: [
           FontSizeControls(
-            canDecrease: fontSize > FontSizeService.minDuaFontSize,
-            canIncrease: fontSize < FontSizeService.maxDuaFontSize,
+            canDecrease: fontSize > FontSizeService.minFontSize,
+            canIncrease: fontSize < FontSizeService.maxFontSize,
             onDecrease: _decreaseFontSize,
             onIncrease: _increaseFontSize,
           ),
@@ -411,7 +410,7 @@ class _DuaScreenState extends State<DuaScreen>
           textAlign: TextAlign.center,
           style: TextStyle(
             color: colorScheme.primary,
-            fontSize: 23,
+            fontSize: fontSize,
             fontWeight: FontWeight.w700,
             height: 2,
           ),
