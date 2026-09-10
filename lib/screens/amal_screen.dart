@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../models/amal.dart';
 import '../services/favorite_service.dart';
+import '../services/font_size_service.dart';
 import '../widgets/font_size_controls.dart';
 import '../widgets/theme_toggle_button.dart';
 import '../widgets/favorite_button.dart';
@@ -16,26 +18,148 @@ class AmalScreen extends StatefulWidget {
 }
 
 class _AmalScreenState extends State<AmalScreen> {
-  double fontSize = 22;
+  double fontSize = FontSizeService.defaultFontSize;
 
-  static const double minFontSize = 17;
-  static const double maxFontSize = 32;
   static const double fontStep = 1;
 
-  void _increaseFontSize() {
-    if (fontSize < maxFontSize) {
+  @override
+  void initState() {
+    super.initState();
+    _loadFontSize();
+  }
+
+  // ==========================================================
+  // اندازه فونت
+  // ==========================================================
+
+  Future<void> _loadFontSize() async {
+    final savedSize = await FontSizeService.getAmalFontSize();
+
+    if (!mounted) return;
+
+    setState(() {
+      fontSize = savedSize;
+    });
+  }
+
+  Future<void> _increaseFontSize() async {
+    if (fontSize < FontSizeService.maxFontSize) {
       setState(() {
         fontSize += fontStep;
       });
+
+      await FontSizeService.setAmalFontSize(fontSize);
     }
   }
 
-  void _decreaseFontSize() {
-    if (fontSize > minFontSize) {
+  Future<void> _decreaseFontSize() async {
+    if (fontSize > FontSizeService.minFontSize) {
       setState(() {
         fontSize -= fontStep;
       });
+
+      await FontSizeService.setAmalFontSize(fontSize);
     }
+  }
+
+  // ==========================================================
+  // کپی متن عمل
+  // ==========================================================
+
+  String _buildCopyText() {
+    final buffer = StringBuffer();
+
+    buffer.writeln(widget.amal.title);
+
+    if (widget.amal.source.trim().isNotEmpty) {
+      buffer.writeln(widget.amal.source.trim());
+    }
+
+    buffer.writeln();
+
+    for (var i = 0; i < widget.amal.sections.length; i++) {
+      final section = widget.amal.sections[i];
+
+      if (widget.amal.sections.length > 1) {
+        buffer.writeln('بخش ${i + 1}');
+        buffer.writeln();
+      }
+
+      if (section.arabic.trim().isNotEmpty) {
+        buffer.writeln(section.arabic.trim());
+      }
+
+      if (section.translation.trim().isNotEmpty) {
+        buffer.writeln();
+        buffer.writeln('ترجمه:');
+        buffer.writeln(section.translation.trim());
+      }
+
+      buffer.writeln();
+    }
+
+    return buffer.toString().trim();
+  }
+
+  Future<void> _copySectionText(AmalSection section, int index) async {
+    final buffer = StringBuffer();
+
+    if (widget.amal.sections.length > 1) {
+      buffer.writeln('بخش ${index + 1}');
+    }
+
+    if (section.arabic.trim().isNotEmpty) {
+      buffer.writeln(section.arabic.trim());
+    }
+
+    if (section.translation.trim().isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('ترجمه:');
+      buffer.writeln(section.translation.trim());
+    }
+
+    final text = buffer.toString().trim();
+    if (text.isEmpty) return;
+
+    await Clipboard.setData(ClipboardData(text: text));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'بخش با موفقیت کپی شد.',
+          textDirection: TextDirection.rtl,
+        ),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  Future<void> _copyText() async {
+    final text = _buildCopyText();
+
+    if (text.isEmpty) {
+      return;
+    }
+
+    await Clipboard.setData(ClipboardData(text: text));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'متن عمل کپی شد.',
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.right,
+        ),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -53,11 +177,17 @@ class _AmalScreenState extends State<AmalScreen> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            tooltip: 'کپی متن',
+            onPressed: _copyText,
+            icon: const Icon(Icons.copy_rounded),
+          ),
+
           FontSizeControls(
             onIncrease: _increaseFontSize,
             onDecrease: _decreaseFontSize,
-            canIncrease: fontSize < maxFontSize,
-            canDecrease: fontSize > minFontSize,
+            canIncrease: fontSize < FontSizeService.maxFontSize,
+            canDecrease: fontSize > FontSizeService.minFontSize,
           ),
 
           const SizedBox(width: 4),
@@ -208,82 +338,91 @@ class _AmalScreenState extends State<AmalScreen> {
     );
   }
 
+  // ==========================================================
+  // بخش عمل
+  // ==========================================================
+
   Widget _buildSection(
     AmalSection section,
     int index,
     ColorScheme colorScheme,
     bool isDark,
   ) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 18),
-      padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(26),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withValues(
-              alpha: isDark ? 0.045 : 0.035,
-            ),
-            blurRadius: 18,
-            offset: const Offset(0, 7),
+    return GestureDetector(
+      onLongPress: () => _copySectionText(section, index),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 18),
+        padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.35),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (widget.amal.sections.length > 1)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Text(
-                'بخش ${index + 1}',
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  color: colorScheme.primary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withValues(
+                alpha: isDark ? 0.045 : 0.035,
               ),
-            ),
-
-          if (section.arabic.trim().isNotEmpty)
-            Text(
-              section.arabic,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.justify,
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontSize: fontSize,
-                height: 2.35,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-
-          if (section.translation.trim().isNotEmpty) ...[
-            const SizedBox(height: 22),
-
-            Divider(color: colorScheme.outlineVariant.withValues(alpha: 0.35)),
-
-            const SizedBox(height: 18),
-
-            Text(
-              section.translation,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.justify,
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: fontSize - 3,
-                height: 2.1,
-              ),
+              blurRadius: 18,
+              offset: const Offset(0, 7),
             ),
           ],
-        ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (widget.amal.sections.length > 1)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(
+                  'بخش ${index + 1}',
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+            if (section.arabic.trim().isNotEmpty)
+              Text(
+                section.arabic,
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.justify,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: fontSize,
+                  height: 2.35,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+
+            if (section.translation.trim().isNotEmpty) ...[
+              const SizedBox(height: 22),
+
+              Divider(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+              ),
+
+              const SizedBox(height: 18),
+
+              Text(
+                section.translation,
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.justify,
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: fontSize - 3,
+                  height: 2.1,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

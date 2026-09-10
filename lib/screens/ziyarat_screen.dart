@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../models/ziyarat.dart';
 import '../services/favorite_service.dart';
@@ -91,6 +92,106 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
   }
 
   // ==========================================================
+  // کپی متن زیارت
+  // ==========================================================
+
+  String _buildCopyText() {
+    final buffer = StringBuffer();
+
+    buffer.writeln(widget.ziyarat.title);
+    buffer.writeln();
+    buffer.writeln('بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ');
+    buffer.writeln();
+
+    for (var i = 0; i < widget.ziyarat.sections.length; i++) {
+      final section = widget.ziyarat.sections[i];
+
+      buffer.writeln('بخش ${i + 1}');
+      buffer.writeln();
+
+      if (section.repeatLabel != null &&
+          section.repeatLabel!.trim().isNotEmpty) {
+        buffer.writeln(section.repeatLabel!.trim());
+        buffer.writeln();
+      }
+
+      buffer.writeln(section.arabic.trim());
+
+      if (showTranslation && section.translation.trim().isNotEmpty) {
+        buffer.writeln();
+        buffer.writeln('ترجمه:');
+        buffer.writeln(section.translation.trim());
+      }
+
+      buffer.writeln();
+    }
+
+    return buffer.toString().trim();
+  }
+
+  Future<void> _copySectionText(ZiyaratSection section, int index) async {
+    final buffer = StringBuffer();
+    buffer.writeln('بخش ${index + 1}');
+
+    if (section.repeatLabel != null && section.repeatLabel!.trim().isNotEmpty) {
+      buffer.writeln(section.repeatLabel!.trim());
+    }
+
+    if (section.arabic.trim().isNotEmpty) {
+      buffer.writeln(section.arabic.trim());
+    }
+
+    if (showTranslation && section.translation.trim().isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('ترجمه:');
+      buffer.writeln(section.translation.trim());
+    }
+
+    final text = buffer.toString().trim();
+    if (text.isEmpty) return;
+
+    await Clipboard.setData(ClipboardData(text: text));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'بخش با موفقیت کپی شد.',
+          textDirection: TextDirection.rtl,
+        ),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  Future<void> _copyText() async {
+    final text = _buildCopyText();
+
+    if (text.isEmpty) {
+      return;
+    }
+
+    await Clipboard.setData(ClipboardData(text: text));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'متن زیارت کپی شد.',
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.right,
+        ),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // ==========================================================
   // Build
   // ==========================================================
 
@@ -109,6 +210,11 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            tooltip: 'کپی متن',
+            onPressed: _copyText,
+            icon: const Icon(Icons.copy_rounded),
+          ),
           FontSizeControls(
             canDecrease: fontSize > FontSizeService.minFontSize,
             canIncrease: fontSize < FontSizeService.maxFontSize,
@@ -458,149 +564,152 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withValues(
-                alpha: isDark ? 0.045 : 0.035,
-              ),
-              blurRadius: 18,
-              offset: const Offset(0, 7),
+      child: GestureDetector(
+        onLongPress: () => _copySectionText(section, index),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.35),
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(26),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
+            boxShadow: [
+              BoxShadow(
                 color: colorScheme.primary.withValues(
-                  alpha: isDark ? 0.07 : 0.045,
+                  alpha: isDark ? 0.045 : 0.035,
                 ),
-                child: Row(
-                  textDirection: TextDirection.rtl,
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary.withValues(alpha: 0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          color: colorScheme.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                blurRadius: 18,
+                offset: const Offset(0, 7),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(26),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
+                  color: colorScheme.primary.withValues(
+                    alpha: isDark ? 0.07 : 0.045,
+                  ),
+                  child: Row(
+                    textDirection: TextDirection.rtl,
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 9),
-                    Text(
-                      'بخش ${index + 1}',
-                      textDirection: TextDirection.rtl,
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      Icons.mosque_rounded,
-                      size: 17,
-                      color: colorScheme.primary.withValues(alpha: 0.65),
-                    ),
-                  ],
-                ),
-              ),
-
-              if (section.repeatLabel != null &&
-                  section.repeatLabel!.trim().isNotEmpty)
-                _buildRepeatLabel(section.repeatLabel!, colorScheme),
-
-              Padding(
-                padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
-                child: Text(
-                  section.arabic,
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.justify,
-                  style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontSize: fontSize,
-                    height: 2.35,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-
-              AnimatedCrossFade(
-                duration: const Duration(milliseconds: 300),
-                crossFadeState: hasTranslation
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                firstChild: const SizedBox.shrink(),
-                secondChild: Container(
-                  margin: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-                  padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary.withValues(
-                      alpha: isDark ? 0.07 : 0.055,
-                    ),
-                    borderRadius: BorderRadius.circular(19),
-                    border: Border.all(
-                      color: colorScheme.primary.withValues(alpha: 0.08),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        textDirection: TextDirection.rtl,
-                        children: [
-                          Icon(
-                            Icons.translate_rounded,
-                            size: 17,
-                            color: colorScheme.primary,
-                          ),
-                          const SizedBox(width: 7),
-                          Text(
-                            'ترجمه',
-                            textDirection: TextDirection.rtl,
-                            style: TextStyle(
-                              color: colorScheme.primary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 11),
+                      const SizedBox(width: 9),
                       Text(
-                        section.translation,
+                        'بخش ${index + 1}',
                         textDirection: TextDirection.rtl,
-                        textAlign: TextAlign.justify,
                         style: TextStyle(
                           color: colorScheme.onSurfaceVariant,
-                          fontSize: fontSize * 0.75,
-                          height: 2.05,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
+                      ),
+                      const Spacer(),
+                      Icon(
+                        Icons.mosque_rounded,
+                        size: 17,
+                        color: colorScheme.primary.withValues(alpha: 0.65),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                if (section.repeatLabel != null &&
+                    section.repeatLabel!.trim().isNotEmpty)
+                  _buildRepeatLabel(section.repeatLabel!, colorScheme),
+
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
+                  child: Text(
+                    section.arabic,
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.justify,
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
+                      fontSize: fontSize,
+                      height: 2.35,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+
+                AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 300),
+                  crossFadeState: hasTranslation
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  firstChild: const SizedBox.shrink(),
+                  secondChild: Container(
+                    margin: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                    padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(
+                        alpha: isDark ? 0.07 : 0.055,
+                      ),
+                      borderRadius: BorderRadius.circular(19),
+                      border: Border.all(
+                        color: colorScheme.primary.withValues(alpha: 0.08),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          textDirection: TextDirection.rtl,
+                          children: [
+                            Icon(
+                              Icons.translate_rounded,
+                              size: 17,
+                              color: colorScheme.primary,
+                            ),
+                            const SizedBox(width: 7),
+                            Text(
+                              'ترجمه',
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                color: colorScheme.primary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 11),
+                        Text(
+                          section.translation,
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: fontSize * 0.75,
+                            height: 2.05,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

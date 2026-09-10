@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../models/quran.dart';
 import '../services/font_size_service.dart';
@@ -9,10 +10,7 @@ import '../widgets/theme_toggle_button.dart';
 class QuranReaderScreen extends StatefulWidget {
   final QuranSurah surah;
 
-  const QuranReaderScreen({
-    super.key,
-    required this.surah,
-  });
+  const QuranReaderScreen({super.key, required this.surah});
 
   @override
   State<QuranReaderScreen> createState() => _QuranReaderScreenState();
@@ -29,6 +27,10 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     super.initState();
     _loadFontSize();
   }
+
+  // ==========================================================
+  // اندازه فونت
+  // ==========================================================
 
   Future<void> _loadFontSize() async {
     final savedSize = await FontSizeService.getQuranFontSize();
@@ -58,6 +60,97 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
       await FontSizeService.setQuranFontSize(fontSize);
     }
+  }
+
+  // ==========================================================
+  // کپی متن قرآن
+  // ==========================================================
+
+  String _buildCopyText() {
+    final buffer = StringBuffer();
+
+    buffer.writeln(widget.surah.name);
+
+    if (widget.surah.arabicName.trim().isNotEmpty) {
+      buffer.writeln(widget.surah.arabicName);
+    }
+
+    buffer.writeln();
+    buffer.writeln('بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ');
+    buffer.writeln();
+
+    for (final verse in widget.surah.verses) {
+      buffer.writeln('آیه ${verse.number}');
+      buffer.writeln();
+      buffer.writeln(verse.arabic.trim());
+
+      if (showTranslation && verse.translation.trim().isNotEmpty) {
+        buffer.writeln();
+        buffer.writeln('ترجمه:');
+        buffer.writeln(verse.translation.trim());
+      }
+
+      buffer.writeln();
+    }
+
+    return buffer.toString().trim();
+  }
+
+  Future<void> _copyVerseText(QuranVerse verse) async {
+    final buffer = StringBuffer();
+    buffer.writeln('آیه ${verse.number}');
+    if (verse.arabic.trim().isNotEmpty) {
+      buffer.writeln(verse.arabic.trim());
+    }
+
+    if (showTranslation && verse.translation.trim().isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('ترجمه:');
+      buffer.writeln(verse.translation.trim());
+    }
+
+    final text = buffer.toString().trim();
+    if (text.isEmpty) return;
+
+    await Clipboard.setData(ClipboardData(text: text));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'آیه با موفقیت کپی شد.',
+          textDirection: TextDirection.rtl,
+        ),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  Future<void> _copyText() async {
+    final text = _buildCopyText();
+
+    if (text.isEmpty) {
+      return;
+    }
+
+    await Clipboard.setData(ClipboardData(text: text));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'متن قرآن کپی شد.',
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.right,
+        ),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -149,8 +242,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                                   color: Colors.white.withValues(alpha: 0.13),
                                   borderRadius: BorderRadius.circular(15),
                                   border: Border.all(
-                                    color:
-                                        Colors.white.withValues(alpha: 0.10),
+                                    color: Colors.white.withValues(alpha: 0.10),
                                   ),
                                 ),
                                 child: const Icon(
@@ -161,22 +253,30 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                               ),
                               const Spacer(),
 
-                              // اندازه فونت
+                              IconButton(
+                                tooltip: 'کپی متن',
+                                onPressed: _copyText,
+                                icon: const Icon(
+                                  Icons.copy_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+
                               FontSizeControls(
                                 onIncrease: _increaseFontSize,
                                 onDecrease: _decreaseFontSize,
-                                canIncrease: fontSize <
-                                    FontSizeService.maxFontSize,
-                                canDecrease: fontSize >
-                                    FontSizeService.minFontSize,
+                                canIncrease:
+                                    fontSize < FontSizeService.maxFontSize,
+                                canDecrease:
+                                    fontSize > FontSizeService.minFontSize,
                               ),
 
                               const SizedBox(width: 4),
-                              FavoriteButton(
-                                id: widget.surah.id,
-                                size: 25,
-                              ),
+
+                              FavoriteButton(id: widget.surah.id, size: 25),
+
                               const SizedBox(width: 2),
+
                               const ThemeToggleButton(),
                             ],
                           ),
@@ -233,9 +333,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
               ),
             ),
 
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 20),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
             // =========================================================
             // کنترل ترجمه
@@ -251,9 +349,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: primary.withValues(alpha: 0.08),
-                    ),
+                    border: Border.all(color: primary.withValues(alpha: 0.08)),
                   ),
                   child: Row(
                     textDirection: TextDirection.rtl,
@@ -314,9 +410,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
               ),
             ),
 
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 24),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
             // =========================================================
             // بسم الله
@@ -392,9 +486,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
               ),
             ),
 
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 24),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
             // =========================================================
             // آیات
@@ -402,13 +494,10 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 35),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final verse = widget.surah.verses[index];
-                    return _buildVerse(verse, index);
-                  },
-                  childCount: widget.surah.verses.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final verse = widget.surah.verses[index];
+                  return _buildVerse(verse, index);
+                }, childCount: widget.surah.verses.length),
               ),
             ),
           ],
@@ -417,30 +506,18 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     );
   }
 
-  Widget _buildHeaderChip({
-    required IconData icon,
-    required String text,
-  }) {
+  Widget _buildHeaderChip({required IconData icon, required String text}) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.11),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.09),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: Colors.white.withValues(alpha: 0.85),
-            size: 15,
-          ),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 15),
           const SizedBox(width: 5),
           Text(
             text,
@@ -462,139 +539,135 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final primary = colorScheme.primary;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: primary.withValues(
-            alpha: isDark ? 0.10 : 0.07,
+    return GestureDetector(
+      onLongPress: () => _copyVerseText(verse),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 18),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.72),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: primary.withValues(alpha: isDark ? 0.10 : 0.07),
           ),
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            Positioned(
-              left: -32,
-              bottom: -32,
-              child: Container(
-                width: 95,
-                height: 95,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: primary.withValues(alpha: 0.05),
-                    width: 2,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            children: [
+              Positioned(
+                left: -32,
+                bottom: -32,
+                child: Container(
+                  width: 95,
+                  height: 95,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: primary.withValues(alpha: 0.05),
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    verse.arabic,
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.justify,
-                    style: TextStyle(
-                      color: colorScheme.onSurface,
-                      fontSize: fontSize,
-                      height: 2.35,
-                      fontWeight: FontWeight.w500,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      verse.arabic,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.justify,
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: fontSize,
+                        height: 2.35,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 14),
+                    const SizedBox(height: 14),
 
-                  Row(
-                    children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topRight,
-                            end: Alignment.bottomLeft,
-                            colors: [
-                              primary.withValues(alpha: 0.20),
-                              primary.withValues(alpha: 0.07),
-                            ],
+                    Row(
+                      children: [
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
+                              colors: [
+                                primary.withValues(alpha: 0.20),
+                                primary.withValues(alpha: 0.07),
+                              ],
+                            ),
+                            border: Border.all(
+                              color: primary.withValues(alpha: 0.15),
+                            ),
                           ),
-                          border: Border.all(
-                            color: primary.withValues(alpha: 0.15),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${verse.number}',
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${verse.number}',
+
+                        const SizedBox(width: 10),
+
+                        Expanded(
+                          child: Divider(
+                            color: primary.withValues(alpha: 0.13),
+                          ),
+                        ),
+
+                        const SizedBox(width: 10),
+
+                        Text(
+                          'آیه',
+                          textDirection: TextDirection.rtl,
                           style: TextStyle(
-                            color: primary,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 11,
-                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                      ),
+                      ],
+                    ),
 
-                      const SizedBox(width: 10),
+                    if (showTranslation &&
+                        verse.translation.trim().isNotEmpty) ...[
+                      const SizedBox(height: 14),
 
-                      Expanded(
-                        child: Divider(
-                          color: primary.withValues(alpha: 0.13),
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.045),
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
-
-                      const SizedBox(width: 10),
-
-                      Text(
-                        'آیه',
-                        textDirection: TextDirection.rtl,
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 11,
+                        child: Text(
+                          verse.translation,
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: fontSize * 0.70,
+                            height: 2.05,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
                     ],
-                  ),
-
-                  if (showTranslation &&
-                      verse.translation.trim().isNotEmpty) ...[
-                    const SizedBox(height: 14),
-
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(
-                        14,
-                        13,
-                        14,
-                        13,
-                      ),
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.045),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        verse.translation,
-                        textDirection: TextDirection.rtl,
-                        textAlign: TextAlign.justify,
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: fontSize * 0.70,
-                          height: 2.05,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
