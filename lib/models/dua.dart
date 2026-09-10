@@ -16,12 +16,14 @@ class Dua {
   final String id;
   final String title;
   final String category;
+  final String subcategory;
   final List<DuaSection> sections;
 
   Dua({
     required this.id,
     required this.title,
     required this.category,
+    required this.subcategory,
     required this.sections,
   });
 
@@ -33,6 +35,7 @@ class Dua {
         id: json['id'],
         title: json['title'],
         category: json['category'],
+        subcategory: json['subcategory'] ?? '',
         sections: (json['sections'] as List<dynamic>)
             .map((item) => DuaSection.fromJson(item))
             .toList(),
@@ -50,6 +53,7 @@ class Dua {
       id: json['id'],
       title: json['title'],
       category: json['category'],
+      subcategory: json['subcategory'] ?? '',
       sections: sections,
     );
   }
