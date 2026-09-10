@@ -16,6 +16,7 @@ class Amal {
   final String id;
   final String title;
   final String category;
+  final String subcategory;
   final String type;
   final List<AmalSection> sections;
   final String source;
@@ -24,6 +25,7 @@ class Amal {
     required this.id,
     required this.title,
     required this.category,
+    required this.subcategory,
     required this.type,
     required this.sections,
     required this.source,
@@ -34,6 +36,7 @@ class Amal {
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       category: json['category'] ?? '',
+      subcategory: json['subcategory'] ?? '',
       type: json['type'] ?? '',
       sections: (json['sections'] as List<dynamic>? ?? [])
           .map((item) => AmalSection.fromJson(item))
