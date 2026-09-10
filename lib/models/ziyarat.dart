@@ -22,12 +22,14 @@ class Ziyarat {
   final String id;
   final String title;
   final String category;
+  final String subcategory;
   final List<ZiyaratSection> sections;
 
   Ziyarat({
     required this.id,
     required this.title,
     required this.category,
+    required this.subcategory,
     required this.sections,
   });
 
@@ -36,6 +38,7 @@ class Ziyarat {
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       category: json['category'] ?? '',
+      subcategory: json['subcategory'] ?? '',
       sections: (json['sections'] as List<dynamic>? ?? [])
           .map((item) => ZiyaratSection.fromJson(item as Map<String, dynamic>))
           .toList(),
