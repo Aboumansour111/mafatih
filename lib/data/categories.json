@@ -2,17 +2,98 @@
   {
     "id": "duas",
     "title": "ادعیه",
-    "icon": "dua"
+    "icon": "dua",
+    "subcategories": [
+      {
+        "id": "famous",
+        "title": "ادعیه مشهور",
+        "icon": "auto_stories"
+      },
+      {
+        "id": "daily",
+        "title": "ادعیه روزانه",
+        "icon": "today"
+      },
+      {
+        "id": "occasional",
+        "title": "ادعیه مناسبتی",
+        "icon": "event"
+      },
+      {
+        "id": "needs",
+        "title": "ادعیه حاجات",
+        "icon": "volunteer_activism"
+      },
+      {
+        "id": "imams",
+        "title": "ادعیه بر اساس معصوم",
+        "icon": "person"
+      }
+    ]
   },
   {
     "id": "amal",
     "title": "اعمال",
-    "icon": "calendar"
+    "icon": "calendar",
+    "subcategories": [
+      {
+        "id": "daily",
+        "title": "اعمال روزانه",
+        "icon": "today"
+      },
+      {
+        "id": "weekly",
+        "title": "اعمال هفتگی",
+        "icon": "view_week"
+      },
+      {
+        "id": "monthly",
+        "title": "اعمال ماهانه",
+        "icon": "calendar_month"
+      },
+      {
+        "id": "occasional",
+        "title": "اعمال مناسبتی",
+        "icon": "event"
+      },
+      {
+        "id": "prayers",
+        "title": "نمازها",
+        "icon": "mosque"
+      },
+      {
+        "id": "needs",
+        "title": "اعمال حاجات",
+        "icon": "volunteer_activism"
+      }
+    ]
   },
   {
     "id": "ziyarat",
     "title": "زیارات",
-    "icon": "mosque"
+    "icon": "mosque",
+    "subcategories": [
+      {
+        "id": "famous",
+        "title": "زیارات مشهور",
+        "icon": "auto_stories"
+      },
+      {
+        "id": "imams",
+        "title": "زیارات ائمه",
+        "icon": "person"
+      },
+      {
+        "id": "ahl_al_bayt",
+        "title": "زیارات اهل‌بیت و اصحاب",
+        "icon": "groups"
+      },
+      {
+        "id": "occasional",
+        "title": "زیارات مناسبتی",
+        "icon": "event"
+      }
+    ]
   },
   {
     "id": "quran",

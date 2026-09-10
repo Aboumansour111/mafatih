@@ -27,6 +27,8 @@ class CategoryScreen extends StatefulWidget {
 class _CategoryScreenState extends State<CategoryScreen> {
   final ContentService _contentService = ContentService();
 
+  String? _selectedSubcategory;
+
   @override
   Widget build(BuildContext context) {
     if (widget.category.id == 'favorite') {
@@ -63,7 +65,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
   // ==========================================================
   // علاقه‌مندی‌ها
   // ==========================================================
-
   Widget _buildFavoriteScreen() {
     return Scaffold(
       appBar: AppBar(
@@ -220,7 +221,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
   // ==========================================================
   // علاقه‌مندی‌ها
   // ==========================================================
-
   Future<Set<String>> _getFavoriteIds() async {
     final service = FavoriteService();
 
@@ -230,7 +230,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
   // ==========================================================
   // بارگذاری تمام محتوا
   // ==========================================================
-
   Future<List<dynamic>> _loadAllContent() async {
     final duas = await _contentService.loadDuas();
     final amals = await _contentService.loadAmals();
@@ -243,7 +242,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
   // ==========================================================
   // شناسه علاقه‌مندی
   // ==========================================================
-
   String _getContentFavoriteId(dynamic item) {
     final service = FavoriteService();
 
@@ -269,11 +267,24 @@ class _CategoryScreenState extends State<CategoryScreen> {
   // ==========================================================
   // ادعیه
   // ==========================================================
-
   Widget _buildDuasScreen() {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.category.title),
+        leading: _selectedSubcategory != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: () {
+                  setState(() {
+                    _selectedSubcategory = null;
+                  });
+                },
+              )
+            : null,
+        title: Text(
+          _selectedSubcategory == null
+              ? widget.category.title
+              : _getDuaSubcategoryTitle(_selectedSubcategory!),
+        ),
         centerTitle: true,
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
@@ -303,51 +314,128 @@ class _CategoryScreenState extends State<CategoryScreen> {
               .where((dua) => dua.category == widget.category.id)
               .toList();
 
-          if (categoryDuas.isEmpty) {
-            return const Center(
-              child: Text(
-                'هنوز دعایی برای این بخش اضافه نشده است.',
-                style: TextStyle(fontSize: 16),
-              ),
-            );
+          if (_selectedSubcategory == null) {
+            return _buildDuaSubcategorySelection(categoryDuas);
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: categoryDuas.length,
-            itemBuilder: (context, index) {
-              final dua = categoryDuas[index];
+          final selectedDuas = _selectedSubcategory == ''
+              ? categoryDuas.where((dua) => dua.subcategory.isEmpty).toList()
+              : categoryDuas
+                    .where((dua) => dua.subcategory == _selectedSubcategory)
+                    .toList();
 
-              return _buildContentCard(
-                id: FavoriteService().duaId(dua.id),
-                title: dua.title,
-                icon: Icons.auto_stories_rounded,
-                onTap: () async {
-                  await Navigator.push(
-                    context,
-                    AppRoutes.slide(DuaScreen(dua: dua)),
-                  );
-
-                  if (mounted) {
-                    setState(() {});
-                  }
-                },
-              );
-            },
-          );
+          return _buildDuaList(selectedDuas);
         },
       ),
     );
   }
 
+  Widget _buildDuaSubcategorySelection(List<Dua> duas) {
+    final subcategories = widget.category.subcategories;
+
+    final hasUncategorized = duas.any((dua) => dua.subcategory.isEmpty);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        ...subcategories.map(
+          (subcategory) => _buildSubcategoryCard(
+            item: _SubcategoryItem(
+              id: subcategory.id,
+              title: subcategory.title,
+              icon: _getSubcategoryIcon(subcategory.icon),
+            ),
+            onTap: () {
+              setState(() {
+                _selectedSubcategory = subcategory.id;
+              });
+            },
+          ),
+        ),
+        if (hasUncategorized)
+          _buildSubcategoryCard(
+            item: const _SubcategoryItem(
+              id: '',
+              title: 'سایر دعاها',
+              icon: Icons.more_horiz_rounded,
+            ),
+            onTap: () {
+              setState(() {
+                _selectedSubcategory = '';
+              });
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDuaList(List<Dua> duas) {
+    if (duas.isEmpty) {
+      return const Center(
+        child: Text(
+          'هنوز دعایی در این زیرمجموعه اضافه نشده است.',
+          style: TextStyle(fontSize: 16),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: duas.length,
+      itemBuilder: (context, index) {
+        final dua = duas[index];
+
+        return _buildContentCard(
+          id: FavoriteService().duaId(dua.id),
+          title: dua.title,
+          icon: Icons.auto_stories_rounded,
+          onTap: () async {
+            await Navigator.push(context, AppRoutes.slide(DuaScreen(dua: dua)));
+
+            if (mounted) {
+              setState(() {});
+            }
+          },
+        );
+      },
+    );
+  }
+
+  String _getDuaSubcategoryTitle(String subcategory) {
+    if (subcategory.isEmpty) {
+      return 'سایر دعاها';
+    }
+
+    for (final item in widget.category.subcategories) {
+      if (item.id == subcategory) {
+        return item.title;
+      }
+    }
+
+    return widget.category.title;
+  }
+
   // ==========================================================
   // اعمال
   // ==========================================================
-
   Widget _buildAmalScreen() {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.category.title),
+        leading: _selectedSubcategory != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: () {
+                  setState(() {
+                    _selectedSubcategory = null;
+                  });
+                },
+              )
+            : null,
+        title: Text(
+          _selectedSubcategory == null
+              ? widget.category.title
+              : _getAmalSubcategoryTitle(_selectedSubcategory!),
+        ),
         centerTitle: true,
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
@@ -377,51 +465,131 @@ class _CategoryScreenState extends State<CategoryScreen> {
               .where((amal) => amal.category == widget.category.id)
               .toList();
 
-          if (categoryAmals.isEmpty) {
-            return const Center(
-              child: Text(
-                'هنوز عملی برای این بخش اضافه نشده است.',
-                style: TextStyle(fontSize: 16),
-              ),
-            );
+          if (_selectedSubcategory == null) {
+            return _buildAmalSubcategorySelection(categoryAmals);
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: categoryAmals.length,
-            itemBuilder: (context, index) {
-              final amal = categoryAmals[index];
+          final selectedAmals = _selectedSubcategory == ''
+              ? categoryAmals.where((amal) => amal.subcategory.isEmpty).toList()
+              : categoryAmals
+                    .where((amal) => amal.subcategory == _selectedSubcategory)
+                    .toList();
 
-              return _buildContentCard(
-                id: FavoriteService().amalId(amal.id),
-                title: amal.title,
-                icon: Icons.calendar_month_rounded,
-                onTap: () async {
-                  await Navigator.push(
-                    context,
-                    AppRoutes.slide(AmalScreen(amal: amal)),
-                  );
-
-                  if (mounted) {
-                    setState(() {});
-                  }
-                },
-              );
-            },
-          );
+          return _buildAmalList(selectedAmals);
         },
       ),
     );
   }
 
+  Widget _buildAmalSubcategorySelection(List<Amal> amals) {
+    final subcategories = widget.category.subcategories;
+
+    final hasUncategorized = amals.any((amal) => amal.subcategory.isEmpty);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        ...subcategories.map(
+          (subcategory) => _buildSubcategoryCard(
+            item: _SubcategoryItem(
+              id: subcategory.id,
+              title: subcategory.title,
+              icon: _getSubcategoryIcon(subcategory.icon),
+            ),
+            onTap: () {
+              setState(() {
+                _selectedSubcategory = subcategory.id;
+              });
+            },
+          ),
+        ),
+        if (hasUncategorized)
+          _buildSubcategoryCard(
+            item: const _SubcategoryItem(
+              id: '',
+              title: 'سایر اعمال',
+              icon: Icons.more_horiz_rounded,
+            ),
+            onTap: () {
+              setState(() {
+                _selectedSubcategory = '';
+              });
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAmalList(List<Amal> amals) {
+    if (amals.isEmpty) {
+      return const Center(
+        child: Text(
+          'هنوز عملی در این زیرمجموعه اضافه نشده است.',
+          style: TextStyle(fontSize: 16),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: amals.length,
+      itemBuilder: (context, index) {
+        final amal = amals[index];
+
+        return _buildContentCard(
+          id: FavoriteService().amalId(amal.id),
+          title: amal.title,
+          icon: Icons.calendar_month_rounded,
+          onTap: () async {
+            await Navigator.push(
+              context,
+              AppRoutes.slide(AmalScreen(amal: amal)),
+            );
+
+            if (mounted) {
+              setState(() {});
+            }
+          },
+        );
+      },
+    );
+  }
+
+  String _getAmalSubcategoryTitle(String subcategory) {
+    if (subcategory.isEmpty) {
+      return 'سایر اعمال';
+    }
+
+    for (final item in widget.category.subcategories) {
+      if (item.id == subcategory) {
+        return item.title;
+      }
+    }
+
+    return widget.category.title;
+  }
+
   // ==========================================================
   // زیارات
   // ==========================================================
-
   Widget _buildZiyaratScreen() {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.category.title),
+        leading: _selectedSubcategory != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_forward_ios_rounded),
+                onPressed: () {
+                  setState(() {
+                    _selectedSubcategory = null;
+                  });
+                },
+              )
+            : null,
+        title: Text(
+          _selectedSubcategory == null
+              ? widget.category.title
+              : _getZiyaratSubcategoryTitle(_selectedSubcategory!),
+        ),
         centerTitle: true,
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
@@ -451,47 +619,215 @@ class _CategoryScreenState extends State<CategoryScreen> {
               .where((item) => item.category == widget.category.id)
               .toList();
 
-          if (categoryZiyarat.isEmpty) {
-            return const Center(
-              child: Text(
-                'هنوز زیارتی برای این بخش اضافه نشده است.',
-                style: TextStyle(fontSize: 16),
-              ),
-            );
+          if (_selectedSubcategory == null) {
+            return _buildZiyaratSubcategorySelection(categoryZiyarat);
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: categoryZiyarat.length,
-            itemBuilder: (context, index) {
-              final item = categoryZiyarat[index];
+          final selectedZiyarat = _selectedSubcategory == ''
+              ? categoryZiyarat
+                    .where((item) => item.subcategory.isEmpty)
+                    .toList()
+              : categoryZiyarat
+                    .where((item) => item.subcategory == _selectedSubcategory)
+                    .toList();
 
-              return _buildContentCard(
-                id: FavoriteService().ziyaratId(item.id),
-                title: item.title,
-                icon: Icons.mosque_rounded,
-                onTap: () async {
-                  await Navigator.push(
-                    context,
-                    AppRoutes.slide(ZiyaratScreen(ziyarat: item)),
-                  );
-
-                  if (mounted) {
-                    setState(() {});
-                  }
-                },
-              );
-            },
-          );
+          return _buildZiyaratList(selectedZiyarat);
         },
       ),
     );
   }
 
-  // ==========================================================
-  // کارت مشترک
-  // ==========================================================
+  Widget _buildZiyaratSubcategorySelection(List<Ziyarat> ziyarat) {
+    final subcategories = widget.category.subcategories;
 
+    final hasUncategorized = ziyarat.any((item) => item.subcategory.isEmpty);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        ...subcategories.map(
+          (subcategory) => _buildSubcategoryCard(
+            item: _SubcategoryItem(
+              id: subcategory.id,
+              title: subcategory.title,
+              icon: _getSubcategoryIcon(subcategory.icon),
+            ),
+            onTap: () {
+              setState(() {
+                _selectedSubcategory = subcategory.id;
+              });
+            },
+          ),
+        ),
+        if (hasUncategorized)
+          _buildSubcategoryCard(
+            item: const _SubcategoryItem(
+              id: '',
+              title: 'سایر زیارات',
+              icon: Icons.more_horiz_rounded,
+            ),
+            onTap: () {
+              setState(() {
+                _selectedSubcategory = '';
+              });
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildZiyaratList(List<Ziyarat> ziyarat) {
+    if (ziyarat.isEmpty) {
+      return const Center(
+        child: Text(
+          'هنوز زیارتی در این زیرمجموعه اضافه نشده است.',
+          style: TextStyle(fontSize: 16),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: ziyarat.length,
+      itemBuilder: (context, index) {
+        final item = ziyarat[index];
+
+        return _buildContentCard(
+          id: FavoriteService().ziyaratId(item.id),
+          title: item.title,
+          icon: Icons.mosque_rounded,
+          onTap: () async {
+            await Navigator.push(
+              context,
+              AppRoutes.slide(ZiyaratScreen(ziyarat: item)),
+            );
+
+            if (mounted) {
+              setState(() {});
+            }
+          },
+        );
+      },
+    );
+  }
+
+  String _getZiyaratSubcategoryTitle(String subcategory) {
+    if (subcategory.isEmpty) {
+      return 'سایر زیارات';
+    }
+
+    for (final item in widget.category.subcategories) {
+      if (item.id == subcategory) {
+        return item.title;
+      }
+    }
+
+    return widget.category.title;
+  }
+
+  // ==========================================================
+  // آیکون زیرمجموعه
+  // ==========================================================
+  IconData _getSubcategoryIcon(String icon) {
+    switch (icon) {
+      case 'auto_stories':
+        return Icons.auto_stories_rounded;
+      case 'today':
+        return Icons.today_rounded;
+      case 'event':
+        return Icons.event_rounded;
+      case 'volunteer_activism':
+        return Icons.volunteer_activism_rounded;
+      case 'person':
+        return Icons.person_rounded;
+      case 'view_week':
+        return Icons.view_week_rounded;
+      case 'calendar_month':
+        return Icons.calendar_month_rounded;
+      case 'mosque':
+        return Icons.mosque_rounded;
+      case 'groups':
+        return Icons.groups_rounded;
+      case 'more':
+        return Icons.more_horiz_rounded;
+      default:
+        return Icons.auto_stories_rounded;
+    }
+  }
+
+  // ==========================================================
+  // کارت زیرمجموعه
+  // ==========================================================
+  Widget _buildSubcategoryCard({
+    required _SubcategoryItem item,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final cardColor = isDark ? const Color(0xff0b2925) : Colors.white;
+
+    final iconColor = isDark
+        ? const Color(0xff39b9a4)
+        : const Color(0xff00695c);
+
+    final iconBackground = isDark
+        ? const Color(0xff008f7a).withValues(alpha: 0.18)
+        : const Color(0xff00695c).withValues(alpha: 0.12);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: iconBackground,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(item.icon, color: iconColor, size: 28),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Text(
+                  item.title,
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.arrow_back_ios_rounded, size: 18, color: iconColor),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==========================================================
+  // کارت محتوا
+  // ==========================================================
   Widget _buildContentCard({
     required String id,
     required String title,
@@ -543,9 +879,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 ),
                 child: Icon(icon, color: iconColor, size: 28),
               ),
-
               const SizedBox(width: 15),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -558,9 +892,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 6),
-
                     Text(
                       subtitle,
                       textDirection: TextDirection.rtl,
@@ -569,13 +901,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(width: 8),
-
               FavoriteButton(id: id, size: 27),
-
               const SizedBox(width: 4),
-
               Icon(Icons.arrow_back_ios_rounded, size: 18, color: iconColor),
             ],
           ),
@@ -583,4 +911,16 @@ class _CategoryScreenState extends State<CategoryScreen> {
       ),
     );
   }
+}
+
+class _SubcategoryItem {
+  final String id;
+  final String title;
+  final IconData icon;
+
+  const _SubcategoryItem({
+    required this.id,
+    required this.title,
+    required this.icon,
+  });
 }
