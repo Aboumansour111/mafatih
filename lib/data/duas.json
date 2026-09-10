@@ -1,29 +1,443 @@
 [
   {
-    "id": "dua_jomeh",
-    "title": "دعای روز جمعه",
+    "id": "dua_azkar_ruzane",
+    "title": "اذکار روزانه",
     "category": "duas",
-    "sections": [
-      {
-        "arabic": "اَلْحَمْدُ للهِ الاَْوَّلِ قَبْلَ الاِْنْشاءِ وَالاِْحْياءِ وَالاْخِرِ بَعْدَ فَناءِ الاَْشْياءِ الْعَليمِ الَّذى لا يَنْسى مَنْ ذَكَرَهُ وَلا يَنْقُصُ مَنْ شَكَرَهُ وَلا يَخيبُ مَنْ دَعاهُ وَلا يَقْطَعُ رَجاءَ مَنْ رَجاهُ",
-        "translation": "ستایش مخصوص خداوندی است که پیش از آفرینش و زندگی، نخستین بود و پس از نابودی همه چیز، واپسین خواهد بود؛ دانایی که یادکننده‌اش را فراموش نمی‌کند، سپاس‌گزارش را محروم نمی‌سازد، دعاکننده‌اش را ناامید نمی‌گرداند، و امیدبندش را بی‌پاسخ نمی‌گذارد."
-      },
-      {
-        "arabic": "اَللّـهُمَّ اِنّى اُشْهِدُكَ وَكَفى بِكَ شَهيداً وَاُشْهِدُ جَميعَ مَلائِكَتِكَ وَسُكّانَ سَمواتِكَ وَ حَمَلَةَ عَرْشِكَ وَمَنْ بَعَثْتَ مِنْ اَنْبِيائِكَ وَرُسُلِكَ وَاَنْشَأْتَ مِنْ اَصْنافِ خَلْقِكَ اَنّي اَشْهَدُ اَنَّكَ اَنْتَ اللهُ لا اِلـهَ اِلاّ اَنْتَ وَحْدَكَ لا شَريكَ لَكَ وَلا عَديلَ وَلا خُلْفَ لِقَوْلِكَ وَلا تَبْديلَ",
-        "translation": "بارالها، تو را گواه می‌گیرم و بسنده است که تو خود شاهد باشی؛ و گواه می‌گیرم همه فرشتگانت، ساکنان آسمانت، حاملان عرشت، پیامبران و رسولانی که برانگیختی، و همه آفریدگانت را، که گواهی می‌دهم تویی خداوند یکتا، که هیچ معبودی جز تو نیست، بی‌همتا و بی‌هم‌پایه‌ای، سخنت دگرگون نمی‌شود و وعده‌ات تغییر نمی‌پذیرد."
-      },
-      {
-        "arabic": "وَاَنَّ مُحَمَّداً صَلَّى اللهُ عَلَيْهِ وَآلِهِ عَبْدُكَ وَرَسُولُكَ اَدّى ما حَمَّلْتَهُ اِلَى العِبادِ وَجاهَدَ فِي اللهِ عَزَّ وَجَلَّ حَقَّ الْجِهادِ وَاَنَّهُ بَشَّرَ بِما هُوَ حَقٌّ مِنَ الثَّوابِ وَاَنْذَرَ بِما هُوَ صِدْقٌ مِنَ الْعِقابِ",
-        "translation": "و محمد صلی‌الله‌علیه‌وآله، بنده و فرستاده‌ی توست، که آنچه بر او نهادی به بندگانت رساند، و در راه تو به‌راستی جهاد کرد؛ او بشارت داد به پاداشی که حق است، و هشدار داد از عذابی که راست است."
-      },
-      {
-        "arabic": "اَللّـهُمَّ ثَبِّتْني عَلى دينِكَ ما اَحْيَيْتَني وَلا تُزِغْ قَلْبي بَعْدَ اِذْ هَدَيْتَني وَهَبْ لي مِنْ لَدُنْكَ رَحْمَةً اِنَّكَ اَنْتَ الْوَهّابُ صَلِّ عَلى مُحَمَّدٍ وَعَلى آلِ مُحَمَّدٍ وَاجْعَلْني مِنْ اَتْباعِهِ وَشيعَتِهِ وَاحْشُرْني في زُمْرَتِهِ",
-        "translation": "خدایا، تا زنده‌ام بر دینت پایدارم بدار، و پس از آن‌که هدایتم کردی، دلم را منحرف مکن، و از نزد خود رحمتی به من ببخش، که تویی بخشنده‌ی بی‌منت. درود فرست بر محمد و خاندانش، و مرا از پیروان و شیعیان او قرار ده، و در گروه او محشورم کن."
-      },
-      {
-        "arabic": "وَوَفِّقْني لاَِداءِ فَرْضِ الْجُمُعاتِ وَما اَوْجَبْتَ عَلَيَّ فيها مِنَ الطّاعاتِ وَقَسَمْتَ لاَِهْلِها مِنَ الْعَطاءِ في يَوْمِ الْجَزاءِ اِنَّكَ اَنْتَ الْعَزيزُ الْحَكيمُ.",
-        "translation": "و توفیقم ده تا واجبات جمعه و طاعات مقرر آن را به‌جا آورم، و از عطایایی که در روز پاداش برای اهلش مقدر کرده‌ای، بهره‌مندم ساز، که تویی عزیز و حکیم."
-      }
-    ]
+    "subcategory": "daily",
+    "telegram_link": "t.me/MAFATIH10313/103",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_sabah",
+    "title": "دعای صبحگاه",
+    "category": "duas",
+    "subcategory": "daily",
+    "telegram_link": "t.me/MAFATIH10313/25",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_sham",
+    "title": "دعای شامگاه",
+    "category": "duas",
+    "subcategory": "daily",
+    "telegram_link": "t.me/MAFATIH10313/24",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_arafeh",
+    "title": "تکمله دعای امام حسین (ع) در روز عرفه",
+    "category": "duas",
+    "subcategory": "occasional",
+    "telegram_link": "t.me/MAFATIH10313/100",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_asef",
+    "title": "دعای آصف بن برخیا",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/64",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_yasin",
+    "title": "دعای بحق یاسین",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/69",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_musa",
+    "title": "دعای حضرت موسی",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/63",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_zakhireh",
+    "title": "دعای ذخیره",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/66",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_sanami_quraish",
+    "title": "دعای صنمی قریش",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/79",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_adilah",
+    "title": "دعای عدیله",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/71",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_asharat",
+    "title": "دعای عشرات",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/73",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_qamus",
+    "title": "دعای قاموس",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/124",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_qamus_sayfi",
+    "title": "دعای قاموس یا سیفی صغیر",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/59",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_maqatel",
+    "title": "دعا مقاتل",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/68",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_sahifeh_7",
+    "title": "دعای هفتم صحیفه سجادیه",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/78",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_ya_man_iza",
+    "title": "دعای یامن اذا تضایقت",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/65",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_sayfi_saghir",
+    "title": "دعای سیفی صغیر",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/33",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_meraj",
+    "title": "دعای معراج",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/127",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_meraj_khawas",
+    "title": "خواص دعای معراج",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/128",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_meraj_shan",
+    "title": "شان نزول و خواص دعای معراج",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/129",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "salawat_zarrab",
+    "title": "صلوات ابوالحسن ضراب اصفهانی",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/75",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "hadith_kisa",
+    "title": "حدیث شریف کساء یمانی",
+    "category": "duas",
+    "subcategory": "famous",
+    "telegram_link": "t.me/MAFATIH10313/57",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_shifa",
+    "title": "دعای شفا",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/119",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_shifa_sar",
+    "title": "دعای شفا درد سر",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/111",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_dafe_tab",
+    "title": "دعای دفع تب",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/123",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_darman_faramoshi",
+    "title": "درمان فراموشی",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/80",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_faramoshi_hafizeh",
+    "title": "درمان فراموشی و تقویت حافظه",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/109",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_darman_kuri",
+    "title": "درمان کوری و ضعف بینایی",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/113",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_parishani",
+    "title": "اعمال درمان پریشانی و ترس مداوم",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/110",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_shenakht_raah",
+    "title": "ذکر برای شناخت راهی که انسان را به مقصدش می‌رساند",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/115",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_royaye_sadeqeh",
+    "title": "دعای طلب رویای صادقه",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/125",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_rizq",
+    "title": "دعای رزق",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/70",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_afzayesh_rizq",
+    "title": "دعای افزایش رزق مادی و معنوی",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/116",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "zekr_afzayesh_rizq_1",
+    "title": "ذکر افزایش رزق و روزی",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/117",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "zekr_afzayesh_rizq_2",
+    "title": "ذکر جهت افزایش رزق و روزی",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/118",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_hifz_1",
+    "title": "دعای امیرالمومنین (ع) برای حفظ",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/32",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_hifz_2",
+    "title": "دعای امیرالمومنین (ع) برای حفظ",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/26",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_hijab_ali",
+    "title": "دعای حجاب امیرالمومنین (ع)",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/106",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_tahsin",
+    "title": "دعای تحصین",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/12",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_tahsin_ahmad",
+    "title": "دعای تحصین با خط منسوب به سید احمد الحسن (ع)",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/15",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "azkar_hifz_yamani",
+    "title": "اذکار توصیه شده سید یمانی (ع) برای حفظ",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/36",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_dafe_mas",
+    "title": "دفع مس جن",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/122",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_hijab_shayatin",
+    "title": "دعا حجاب و محفوظ ماندن از شیاطین جنی",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/114",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_raf_shayatin",
+    "title": "اعمال رفع شیاطین و گشایش زندگی زناشویی",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/108",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_goshayesh_zanashuyi",
+    "title": "اعمال گشایش روابط زناشویی و دفع بسته شدن زوجین",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/121",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "zekr_dafe_vasvas",
+    "title": "ذکر جهت دفع وسوسه‌های شیطانی و خیالات نفسانی",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/62",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_hijab_koffar",
+    "title": "حجاب در برابر کفار و غیرمومنین",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/120",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "hirz_shorur",
+    "title": "حرز جهت حفظ از جمیع شرور (به‌خصوص شر شیاطین جنی)",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/5",
+    "arabic": "",
+    "translation": ""
+  },
+  {
+    "id": "dua_hasadat",
+    "title": "درمان حسادت و دفع سحر و طلسم",
+    "category": "duas",
+    "subcategory": "needs",
+    "telegram_link": "t.me/MAFATIH10313/112",
+    "arabic": "",
+    "translation": ""
   }
 ]
