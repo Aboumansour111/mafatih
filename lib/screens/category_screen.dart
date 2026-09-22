@@ -482,9 +482,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 
   Widget _buildAmalSubcategorySelection(List<Amal> amals) {
-    final subcategories = widget.category.subcategories;
+    final subcategories = amals
+        .map((amal) => amal.subcategory.trim())
+        .where((subcategory) => subcategory.isNotEmpty)
+        .toSet()
+        .toList();
 
-    final hasUncategorized = amals.any((amal) => amal.subcategory.isEmpty);
+    subcategories.sort();
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -492,30 +496,17 @@ class _CategoryScreenState extends State<CategoryScreen> {
         ...subcategories.map(
           (subcategory) => _buildSubcategoryCard(
             item: _SubcategoryItem(
-              id: subcategory.id,
-              title: subcategory.title,
-              icon: _getSubcategoryIcon(subcategory.icon),
+              id: subcategory,
+              title: subcategory,
+              icon: _getAmalSubcategoryIcon(subcategory),
             ),
             onTap: () {
               setState(() {
-                _selectedSubcategory = subcategory.id;
+                _selectedSubcategory = subcategory;
               });
             },
           ),
         ),
-        if (hasUncategorized)
-          _buildSubcategoryCard(
-            item: const _SubcategoryItem(
-              id: '',
-              title: 'سایر اعمال',
-              icon: Icons.more_horiz_rounded,
-            ),
-            onTap: () {
-              setState(() {
-                _selectedSubcategory = '';
-              });
-            },
-          ),
       ],
     );
   }
@@ -555,18 +546,43 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
+  IconData _getAmalSubcategoryIcon(String subcategory) {
+    switch (subcategory) {
+      case 'تعقیبات نماز':
+        return Icons.mosque_rounded;
+
+      case 'اذکار و محافظت':
+        return Icons.shield_rounded;
+
+      case 'سجده شکر':
+        return Icons.volunteer_activism_rounded;
+
+      case 'رجب':
+      case 'شعبان':
+      case 'رمضان':
+      case 'شوال':
+      case 'ذی‌القعده':
+      case 'ذی‌الحجه':
+      case 'محرم':
+      case 'صفر':
+      case 'ربیع‌الاول':
+      case 'ربیع‌الثانی':
+        return Icons.calendar_month_rounded;
+
+      case 'ماه‌های قمری و رومی':
+        return Icons.date_range_rounded;
+
+      default:
+        return Icons.auto_stories_rounded;
+    }
+  }
+
   String _getAmalSubcategoryTitle(String subcategory) {
     if (subcategory.isEmpty) {
       return 'سایر اعمال';
     }
 
-    for (final item in widget.category.subcategories) {
-      if (item.id == subcategory) {
-        return item.title;
-      }
-    }
-
-    return widget.category.title;
+    return subcategory;
   }
 
   // ==========================================================
@@ -732,24 +748,34 @@ class _CategoryScreenState extends State<CategoryScreen> {
     switch (icon) {
       case 'auto_stories':
         return Icons.auto_stories_rounded;
+
       case 'today':
         return Icons.today_rounded;
+
       case 'event':
         return Icons.event_rounded;
+
       case 'volunteer_activism':
         return Icons.volunteer_activism_rounded;
+
       case 'person':
         return Icons.person_rounded;
+
       case 'view_week':
         return Icons.view_week_rounded;
+
       case 'calendar_month':
         return Icons.calendar_month_rounded;
+
       case 'mosque':
         return Icons.mosque_rounded;
+
       case 'groups':
         return Icons.groups_rounded;
+
       case 'more':
         return Icons.more_horiz_rounded;
+
       default:
         return Icons.auto_stories_rounded;
     }

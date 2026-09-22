@@ -22,7 +22,17 @@ class ContentService {
       'lib/data/amals.json',
     );
 
-    final List<dynamic> jsonList = json.decode(jsonString);
+    final dynamic decoded = json.decode(jsonString);
+
+    final List<dynamic> jsonList;
+
+    if (decoded is List) {
+      jsonList = decoded;
+    } else if (decoded is Map<String, dynamic>) {
+      jsonList = decoded['items'] as List<dynamic>? ?? [];
+    } else {
+      throw const FormatException('فرمت amals.json نامعتبر است.');
+    }
 
     return jsonList.map((item) => Amal.fromJson(item)).toList();
   }
