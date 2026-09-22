@@ -75,6 +75,10 @@ class _AmalScreenState extends State<AmalScreen> {
       buffer.writeln(widget.amal.source.trim());
     }
 
+    if (widget.amal.sourceUrl.trim().isNotEmpty) {
+      buffer.writeln(widget.amal.sourceUrl.trim());
+    }
+
     buffer.writeln();
 
     for (var i = 0; i < widget.amal.sections.length; i++) {
@@ -87,6 +91,11 @@ class _AmalScreenState extends State<AmalScreen> {
 
       if (section.arabic.trim().isNotEmpty) {
         buffer.writeln(section.arabic.trim());
+      }
+
+      if (section.repeatLabel != null &&
+          section.repeatLabel!.trim().isNotEmpty) {
+        buffer.writeln('(${section.repeatLabel!.trim()})');
       }
 
       if (section.translation.trim().isNotEmpty) {
@@ -110,6 +119,10 @@ class _AmalScreenState extends State<AmalScreen> {
 
     if (section.arabic.trim().isNotEmpty) {
       buffer.writeln(section.arabic.trim());
+    }
+
+    if (section.repeatLabel != null && section.repeatLabel!.trim().isNotEmpty) {
+      buffer.writeln('(${section.repeatLabel!.trim()})');
     }
 
     if (section.translation.trim().isNotEmpty) {
@@ -290,6 +303,29 @@ class _AmalScreenState extends State<AmalScreen> {
                             ),
                           ),
                         ],
+
+                        if (widget.amal.status.trim().isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              widget.amal.status,
+                              textDirection: TextDirection.rtl,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -311,7 +347,9 @@ class _AmalScreenState extends State<AmalScreen> {
                           ),
                           const SizedBox(height: 18),
                           Text(
-                            'محتوایی برای نمایش وجود ندارد.',
+                            widget.amal.status.trim().isNotEmpty
+                                ? widget.amal.status
+                                : 'محتوایی برای نمایش وجود ندارد.',
                             textDirection: TextDirection.rtl,
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -319,6 +357,20 @@ class _AmalScreenState extends State<AmalScreen> {
                               fontSize: 15,
                             ),
                           ),
+                          if (widget.amal.sourceUrl.trim().isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              widget.amal.sourceUrl,
+                              textDirection: TextDirection.ltr,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.7,
+                                ),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     )
@@ -400,6 +452,21 @@ class _AmalScreenState extends State<AmalScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+
+            if (section.repeatLabel != null &&
+                section.repeatLabel!.trim().isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text(
+                section.repeatLabel!,
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: colorScheme.primary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
 
             if (section.translation.trim().isNotEmpty) ...[
               const SizedBox(height: 22),
