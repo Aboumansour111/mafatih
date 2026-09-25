@@ -6,6 +6,7 @@ import '../services/favorite_service.dart';
 import '../services/font_size_service.dart';
 import '../widgets/font_size_controls.dart';
 import '../widgets/theme_toggle_button.dart';
+import '../widgets/favorite_button.dart';
 
 class ZiyaratScreen extends StatefulWidget {
   final Ziyarat ziyarat;
@@ -17,183 +18,109 @@ class ZiyaratScreen extends StatefulWidget {
 }
 
 class _ZiyaratScreenState extends State<ZiyaratScreen> {
-  bool showTranslation = true;
-  bool isFavorite = false;
-
   double fontSize = FontSizeService.defaultFontSize;
 
-  final FavoriteService _favoriteService = FavoriteService();
+  static const double fontStep = 1;
 
   @override
   void initState() {
     super.initState();
-    _loadFavorite();
     _loadFontSize();
   }
 
-  // ==========================================================
-  // علاقه‌مندی
-  // ==========================================================
-
-  Future<void> _loadFavorite() async {
-    final result = await _favoriteService.isZiyaratFavorite(widget.ziyarat.id);
-
-    if (!mounted) return;
-
-    setState(() {
-      isFavorite = result;
-    });
-  }
-
-  Future<void> _toggleFavorite() async {
-    final result = await _favoriteService.toggleZiyaratFavorite(
-      widget.ziyarat.id,
-    );
-
-    if (!mounted) return;
-
-    setState(() {
-      isFavorite = result;
-    });
-  }
-
-  // ==========================================================
-  // اندازه فونت
-  // ==========================================================
-
   Future<void> _loadFontSize() async {
     final savedSize = await FontSizeService.getZiyaratFontSize();
-
     if (!mounted) return;
-
     setState(() {
       fontSize = savedSize;
     });
   }
 
-  Future<void> _decreaseFontSize() async {
-    if (fontSize > FontSizeService.minFontSize) {
-      setState(() {
-        fontSize -= 1;
-      });
-
-      await FontSizeService.setZiyaratFontSize(fontSize);
-    }
-  }
-
   Future<void> _increaseFontSize() async {
     if (fontSize < FontSizeService.maxFontSize) {
       setState(() {
-        fontSize += 1;
+        fontSize += fontStep;
       });
-
       await FontSizeService.setZiyaratFontSize(fontSize);
     }
   }
 
-  // ==========================================================
-  // کپی متن زیارت
-  // ==========================================================
+  Future<void> _decreaseFontSize() async {
+    if (fontSize > FontSizeService.minFontSize) {
+      setState(() {
+        fontSize -= fontStep;
+      });
+      await FontSizeService.setZiyaratFontSize(fontSize);
+    }
+  }
 
   String _buildCopyText() {
     final buffer = StringBuffer();
-
     buffer.writeln(widget.ziyarat.title);
-    buffer.writeln();
-    buffer.writeln('بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ');
     buffer.writeln();
 
     for (var i = 0; i < widget.ziyarat.sections.length; i++) {
       final section = widget.ziyarat.sections[i];
-
-      buffer.writeln('بخش ${i + 1}');
-      buffer.writeln();
-
-      if (section.repeatLabel != null &&
-          section.repeatLabel!.trim().isNotEmpty) {
-        buffer.writeln(section.repeatLabel!.trim());
+      if (widget.ziyarat.sections.length > 1) {
+        buffer.writeln('بخش ${i + 1}');
         buffer.writeln();
       }
-
-      buffer.writeln(section.arabic.trim());
-
-      if (showTranslation && section.translation.trim().isNotEmpty) {
+      if (section.arabic.trim().isNotEmpty) {
+        buffer.writeln(section.arabic.trim());
+      }
+      if (section.translation.trim().isNotEmpty) {
         buffer.writeln();
         buffer.writeln('ترجمه:');
         buffer.writeln(section.translation.trim());
       }
-
       buffer.writeln();
     }
-
     return buffer.toString().trim();
-  }
-
-  Future<void> _copySectionText(ZiyaratSection section, int index) async {
-    final buffer = StringBuffer();
-    buffer.writeln('بخش ${index + 1}');
-
-    if (section.repeatLabel != null && section.repeatLabel!.trim().isNotEmpty) {
-      buffer.writeln(section.repeatLabel!.trim());
-    }
-
-    if (section.arabic.trim().isNotEmpty) {
-      buffer.writeln(section.arabic.trim());
-    }
-
-    if (showTranslation && section.translation.trim().isNotEmpty) {
-      buffer.writeln();
-      buffer.writeln('ترجمه:');
-      buffer.writeln(section.translation.trim());
-    }
-
-    final text = buffer.toString().trim();
-    if (text.isEmpty) return;
-
-    await Clipboard.setData(ClipboardData(text: text));
-
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'بخش با موفقیت کپی شد.',
-          textDirection: TextDirection.rtl,
-        ),
-        duration: Duration(seconds: 1),
-      ),
-    );
   }
 
   Future<void> _copyText() async {
     final text = _buildCopyText();
-
-    if (text.isEmpty) {
-      return;
-    }
-
+    if (text.isEmpty) return;
     await Clipboard.setData(ClipboardData(text: text));
-
     if (!mounted) return;
-
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-          'متن زیارت کپی شد.',
+          'متن با موفقیت کپی شد.',
           textDirection: TextDirection.rtl,
-          textAlign: TextAlign.right,
         ),
         duration: Duration(seconds: 2),
       ),
     );
   }
 
-  // ==========================================================
-  // Build
-  // ==========================================================
+  Future<void> _copySectionText(ZiyaratSection section, int index) async {
+    final buffer = StringBuffer();
+    if (widget.ziyarat.sections.length > 1) {
+      buffer.writeln('بخش ${index + 1}');
+      buffer.writeln();
+    }
+    if (section.arabic.trim().isNotEmpty) {
+      buffer.writeln(section.arabic.trim());
+    }
+    if (section.translation.trim().isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('ترجمه:');
+      buffer.writeln(section.translation.trim());
+    }
+    final text = buffer.toString().trim();
+    if (text.isEmpty) return;
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('بخش کپی شد.', textDirection: TextDirection.rtl),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,12 +143,16 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
             icon: const Icon(Icons.copy_rounded),
           ),
           FontSizeControls(
-            canDecrease: fontSize > FontSizeService.minFontSize,
-            canIncrease: fontSize < FontSizeService.maxFontSize,
-            onDecrease: _decreaseFontSize,
             onIncrease: _increaseFontSize,
+            onDecrease: _decreaseFontSize,
+            canIncrease: fontSize < FontSizeService.maxFontSize,
+            canDecrease: fontSize > FontSizeService.minFontSize,
           ),
-          _FavoriteButton(isFavorite: isFavorite, onPressed: _toggleFavorite),
+          FavoriteButton(
+            id: FavoriteService().ziyaratId(widget.ziyarat.id),
+            size: 25,
+            iconColor: Colors.white,
+          ),
           const ThemeToggleButton(),
           const SizedBox(width: 8),
         ],
@@ -235,11 +166,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
               child: Column(
                 children: [
                   _buildHeroHeader(colorScheme, isDark),
-                  const SizedBox(height: 18),
-                  _buildTranslationControl(colorScheme),
-                  const SizedBox(height: 28),
-                  _buildBismillah(colorScheme),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 22),
                   ...List.generate(widget.ziyarat.sections.length, (index) {
                     return _buildSection(
                       widget.ziyarat.sections[index],
@@ -257,14 +184,10 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
     );
   }
 
-  // ==========================================================
-  // هدر زیارت
-  // ==========================================================
-
   Widget _buildHeroHeader(ColorScheme colorScheme, bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(22, 25, 22, 26),
+      padding: const EdgeInsets.fromLTRB(22, 28, 22, 28),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         gradient: LinearGradient(
@@ -282,276 +205,58 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.22),
+            color: colorScheme.primary.withValues(
+              alpha: isDark ? 0.18 : 0.22,
+            ),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: -45,
-            top: -45,
-            child: Container(
-              width: 135,
-              height: 135,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  width: 2,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: -35,
-            bottom: -50,
-            child: Container(
-              width: 115,
-              height: 115,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.035),
-              ),
-            ),
-          ),
-          Column(
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.13),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.12),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.mosque_rounded,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(height: 17),
-              Text(
-                widget.ziyarat.title,
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  height: 1.6,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${widget.ziyarat.sections.length} بخش',
-                textDirection: TextDirection.rtl,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.72),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================================
-  // کنترل ترجمه
-  // ==========================================================
-
-  Widget _buildTranslationControl(ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Row(
-        textDirection: TextDirection.rtl,
+      child: Column(
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              Icons.translate_rounded,
-              color: colorScheme.primary,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'ترجمه فارسی',
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  showTranslation
-                      ? 'ترجمه در حال نمایش است'
-                      : 'فقط متن عربی نمایش داده می‌شود',
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Switch(
-            value: showTranslation,
-            onChanged: (value) {
-              setState(() {
-                showTranslation = value;
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================================
-  // بسم الله
-  // ==========================================================
-
-  Widget _buildBismillah(ColorScheme colorScheme) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 1,
-                color: colorScheme.primary.withValues(alpha: 0.16),
+              color: Colors.white.withValues(alpha: 0.13),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.12),
               ),
             ),
-            const SizedBox(width: 12),
-            Icon(
-              Icons.auto_awesome_rounded,
-              size: 18,
-              color: colorScheme.primary.withValues(alpha: 0.75),
+            child: const Icon(
+              Icons.mosque_rounded,
+              color: Colors.white,
+              size: 32,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Container(
-                height: 1,
-                color: colorScheme.primary.withValues(alpha: 0.16),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        Text(
-          'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ',
-          textDirection: TextDirection.rtl,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: colorScheme.primary,
-            fontSize: fontSize,
-            fontWeight: FontWeight.w700,
-            height: 2,
           ),
-        ),
-        const SizedBox(height: 14),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 1,
-                color: colorScheme.primary.withValues(alpha: 0.16),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Icon(
-              Icons.auto_awesome_rounded,
-              size: 12,
-              color: colorScheme.primary.withValues(alpha: 0.55),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Container(
-                height: 1,
-                color: colorScheme.primary.withValues(alpha: 0.16),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // ==========================================================
-  // برچسب تکرار
-  // ==========================================================
-
-  Widget _buildRepeatLabel(String label, ColorScheme colorScheme) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(18, 20, 18, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-      decoration: BoxDecoration(
-        color: colorScheme.primary.withValues(alpha: 0.09),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        textDirection: TextDirection.rtl,
-        children: [
-          Icon(Icons.repeat_rounded, size: 20, color: colorScheme.primary),
-          const SizedBox(width: 8),
+          const SizedBox(height: 17),
           Text(
-            label,
+            widget.ziyarat.title,
             textDirection: TextDirection.rtl,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: colorScheme.primary,
-              fontSize: 16,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
               fontWeight: FontWeight.w800,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${widget.ziyarat.sections.length} بخش',
+            textDirection: TextDirection.rtl,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.75),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
       ),
     );
   }
-
-  // ==========================================================
-  // بخش زیارت
-  // ==========================================================
 
   Widget _buildSection(
     ZiyaratSection section,
@@ -559,192 +264,75 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
     ColorScheme colorScheme,
     bool isDark,
   ) {
-    final hasTranslation =
-        showTranslation && section.translation.trim().isNotEmpty;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: GestureDetector(
-        onLongPress: () => _copySectionText(section, index),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(26),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+    return GestureDetector(
+      onLongPress: () => _copySectionText(section, index),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 18),
+        padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withValues(
+                alpha: isDark ? 0.045 : 0.035,
+              ),
+              blurRadius: 18,
+              offset: const Offset(0, 7),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withValues(
-                  alpha: isDark ? 0.045 : 0.035,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (widget.ziyarat.sections.length > 1)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(
+                  'بخش ${index + 1}',
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                blurRadius: 18,
-                offset: const Offset(0, 7),
+              ),
+            if (section.arabic.trim().isNotEmpty)
+              Text(
+                section.arabic,
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.justify,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: fontSize,
+                  height: 2.35,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            if (section.translation.trim().isNotEmpty) ...[
+              const SizedBox(height: 22),
+              Divider(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                section.translation,
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.justify,
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: fontSize - 3,
+                  height: 2.1,
+                ),
               ),
             ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(26),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
-                  color: colorScheme.primary.withValues(
-                    alpha: isDark ? 0.07 : 0.045,
-                  ),
-                  child: Row(
-                    textDirection: TextDirection.rtl,
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${index + 1}',
-                          style: TextStyle(
-                            color: colorScheme.primary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 9),
-                      Text(
-                        'بخش ${index + 1}',
-                        textDirection: TextDirection.rtl,
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const Spacer(),
-                      Icon(
-                        Icons.mosque_rounded,
-                        size: 17,
-                        color: colorScheme.primary.withValues(alpha: 0.65),
-                      ),
-                    ],
-                  ),
-                ),
-
-                if (section.repeatLabel != null &&
-                    section.repeatLabel!.trim().isNotEmpty)
-                  _buildRepeatLabel(section.repeatLabel!, colorScheme),
-
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
-                  child: Text(
-                    section.arabic,
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.justify,
-                    style: TextStyle(
-                      color: colorScheme.onSurface,
-                      fontSize: fontSize,
-                      height: 2.35,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-
-                AnimatedCrossFade(
-                  duration: const Duration(milliseconds: 300),
-                  crossFadeState: hasTranslation
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
-                  firstChild: const SizedBox.shrink(),
-                  secondChild: Container(
-                    margin: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-                    padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(
-                        alpha: isDark ? 0.07 : 0.055,
-                      ),
-                      borderRadius: BorderRadius.circular(19),
-                      border: Border.all(
-                        color: colorScheme.primary.withValues(alpha: 0.08),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          textDirection: TextDirection.rtl,
-                          children: [
-                            Icon(
-                              Icons.translate_rounded,
-                              size: 17,
-                              color: colorScheme.primary,
-                            ),
-                            const SizedBox(width: 7),
-                            Text(
-                              'ترجمه',
-                              textDirection: TextDirection.rtl,
-                              style: TextStyle(
-                                color: colorScheme.primary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 11),
-                        Text(
-                          section.translation,
-                          textDirection: TextDirection.rtl,
-                          textAlign: TextAlign.justify,
-                          style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: fontSize * 0.75,
-                            height: 2.05,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ==========================================================
-// دکمه علاقه‌مندی
-// ==========================================================
-
-class _FavoriteButton extends StatelessWidget {
-  final bool isFavorite;
-  final VoidCallback onPressed;
-
-  const _FavoriteButton({required this.isFavorite, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: isFavorite ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها',
-      onPressed: onPressed,
-      icon: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        transitionBuilder: (child, animation) {
-          return ScaleTransition(
-            scale: animation,
-            child: FadeTransition(opacity: animation, child: child),
-          );
-        },
-        child: Icon(
-          isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-          key: ValueKey(isFavorite),
-          color: isFavorite ? Colors.redAccent : Colors.white,
-          size: 25,
+          ],
         ),
       ),
     );

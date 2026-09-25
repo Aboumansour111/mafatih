@@ -28,15 +28,9 @@ class _AmalScreenState extends State<AmalScreen> {
     _loadFontSize();
   }
 
-  // ==========================================================
-  // اندازه فونت
-  // ==========================================================
-
   Future<void> _loadFontSize() async {
     final savedSize = await FontSizeService.getAmalFontSize();
-
     if (!mounted) return;
-
     setState(() {
       fontSize = savedSize;
     });
@@ -47,7 +41,6 @@ class _AmalScreenState extends State<AmalScreen> {
       setState(() {
         fontSize += fontStep;
       });
-
       await FontSizeService.setAmalFontSize(fontSize);
     }
   }
@@ -57,120 +50,77 @@ class _AmalScreenState extends State<AmalScreen> {
       setState(() {
         fontSize -= fontStep;
       });
-
       await FontSizeService.setAmalFontSize(fontSize);
     }
   }
 
-  // ==========================================================
-  // کپی متن عمل
-  // ==========================================================
-
   String _buildCopyText() {
     final buffer = StringBuffer();
-
     buffer.writeln(widget.amal.title);
-
     if (widget.amal.source.trim().isNotEmpty) {
       buffer.writeln(widget.amal.source.trim());
     }
-
-    if (widget.amal.sourceUrl.trim().isNotEmpty) {
-      buffer.writeln(widget.amal.sourceUrl.trim());
-    }
-
     buffer.writeln();
 
     for (var i = 0; i < widget.amal.sections.length; i++) {
       final section = widget.amal.sections[i];
-
       if (widget.amal.sections.length > 1) {
         buffer.writeln('بخش ${i + 1}');
         buffer.writeln();
       }
-
       if (section.arabic.trim().isNotEmpty) {
         buffer.writeln(section.arabic.trim());
       }
-
-      if (section.repeatLabel != null &&
-          section.repeatLabel!.trim().isNotEmpty) {
-        buffer.writeln('(${section.repeatLabel!.trim()})');
-      }
-
       if (section.translation.trim().isNotEmpty) {
         buffer.writeln();
         buffer.writeln('ترجمه:');
         buffer.writeln(section.translation.trim());
       }
-
       buffer.writeln();
     }
-
     return buffer.toString().trim();
+  }
+
+  Future<void> _copyText() async {
+    final text = _buildCopyText();
+    if (text.isEmpty) return;
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'متن با موفقیت کپی شد.',
+          textDirection: TextDirection.rtl,
+        ),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _copySectionText(AmalSection section, int index) async {
     final buffer = StringBuffer();
-
     if (widget.amal.sections.length > 1) {
       buffer.writeln('بخش ${index + 1}');
+      buffer.writeln();
     }
-
     if (section.arabic.trim().isNotEmpty) {
       buffer.writeln(section.arabic.trim());
     }
-
-    if (section.repeatLabel != null && section.repeatLabel!.trim().isNotEmpty) {
-      buffer.writeln('(${section.repeatLabel!.trim()})');
-    }
-
     if (section.translation.trim().isNotEmpty) {
       buffer.writeln();
       buffer.writeln('ترجمه:');
       buffer.writeln(section.translation.trim());
     }
-
     final text = buffer.toString().trim();
     if (text.isEmpty) return;
-
     await Clipboard.setData(ClipboardData(text: text));
-
     if (!mounted) return;
-
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text(
-          'بخش با موفقیت کپی شد.',
-          textDirection: TextDirection.rtl,
-        ),
+        content: Text('بخش کپی شد.', textDirection: TextDirection.rtl),
         duration: Duration(seconds: 1),
-      ),
-    );
-  }
-
-  Future<void> _copyText() async {
-    final text = _buildCopyText();
-
-    if (text.isEmpty) {
-      return;
-    }
-
-    await Clipboard.setData(ClipboardData(text: text));
-
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'متن عمل کپی شد.',
-          textDirection: TextDirection.rtl,
-          textAlign: TextAlign.right,
-        ),
-        duration: Duration(seconds: 2),
       ),
     );
   }
@@ -195,29 +145,21 @@ class _AmalScreenState extends State<AmalScreen> {
             onPressed: _copyText,
             icon: const Icon(Icons.copy_rounded),
           ),
-
           FontSizeControls(
             onIncrease: _increaseFontSize,
             onDecrease: _decreaseFontSize,
             canIncrease: fontSize < FontSizeService.maxFontSize,
             canDecrease: fontSize > FontSizeService.minFontSize,
           ),
-
-          const SizedBox(width: 4),
-
           FavoriteButton(
             id: FavoriteService().amalId(widget.amal.id),
-            size: 27,
+            size: 25,
+            iconColor: Colors.white,
           ),
-
-          const SizedBox(width: 4),
-
           const ThemeToggleButton(),
-
           const SizedBox(width: 8),
         ],
       ),
-
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -226,161 +168,16 @@ class _AmalScreenState extends State<AmalScreen> {
             sliver: SliverToBoxAdapter(
               child: Column(
                 children: [
-                  // =====================================================
-                  // هدر
-                  // =====================================================
-
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(22, 28, 22, 28),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          colorScheme.primary,
-                          Color.lerp(
-                                colorScheme.primary,
-                                colorScheme.surface,
-                                isDark ? 0.35 : 0.15,
-                              ) ??
-                              colorScheme.primary,
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorScheme.primary.withValues(
-                            alpha: isDark ? 0.18 : 0.22,
-                          ),
-                          blurRadius: 25,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.13),
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.12),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.calendar_month_rounded,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-
-                        const SizedBox(height: 17),
-
-                        Text(
-                          widget.amal.title,
-                          textDirection: TextDirection.rtl,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
-                            height: 1.6,
-                          ),
-                        ),
-
-                        if (widget.amal.source.trim().isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            widget.amal.source,
-                            textDirection: TextDirection.rtl,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.75),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-
-                        if (widget.amal.status.trim().isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              widget.amal.status,
-                              textDirection: TextDirection.rtl,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // =====================================================
-                  // بخش‌های عمل
-                  // =====================================================
-                  if (widget.amal.sections.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 70),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.calendar_month_rounded,
-                            size: 55,
-                            color: colorScheme.primary.withValues(alpha: 0.35),
-                          ),
-                          const SizedBox(height: 18),
-                          Text(
-                            widget.amal.status.trim().isNotEmpty
-                                ? widget.amal.status
-                                : 'محتوایی برای نمایش وجود ندارد.',
-                            textDirection: TextDirection.rtl,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 15,
-                            ),
-                          ),
-                          if (widget.amal.sourceUrl.trim().isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            Text(
-                              widget.amal.sourceUrl,
-                              textDirection: TextDirection.ltr,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: colorScheme.primary.withValues(
-                                  alpha: 0.7,
-                                ),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    )
-                  else
-                    ...widget.amal.sections.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final section = entry.value;
-
-                      return _buildSection(section, index, colorScheme, isDark);
-                    }),
+                  _buildHeroHeader(colorScheme, isDark),
+                  const SizedBox(height: 22),
+                  ...List.generate(widget.amal.sections.length, (index) {
+                    return _buildSection(
+                      widget.amal.sections[index],
+                      index,
+                      colorScheme,
+                      isDark,
+                    );
+                  }),
                 ],
               ),
             ),
@@ -390,9 +187,78 @@ class _AmalScreenState extends State<AmalScreen> {
     );
   }
 
-  // ==========================================================
-  // بخش عمل
-  // ==========================================================
+  Widget _buildHeroHeader(ColorScheme colorScheme, bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(22, 28, 22, 28),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            colorScheme.primary,
+            Color.lerp(
+                  colorScheme.primary,
+                  colorScheme.surface,
+                  isDark ? 0.35 : 0.15,
+                ) ??
+                colorScheme.primary,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.22),
+            blurRadius: 25,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.13),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            ),
+            child: const Icon(
+              Icons.calendar_month_rounded,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 17),
+          Text(
+            widget.amal.title,
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              height: 1.6,
+            ),
+          ),
+          if (widget.amal.source.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              widget.amal.source.trim(),
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.75),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   Widget _buildSection(
     AmalSection section,
@@ -439,7 +305,6 @@ class _AmalScreenState extends State<AmalScreen> {
                   ),
                 ),
               ),
-
             if (section.arabic.trim().isNotEmpty)
               Text(
                 section.arabic,
@@ -452,31 +317,12 @@ class _AmalScreenState extends State<AmalScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-
-            if (section.repeatLabel != null &&
-                section.repeatLabel!.trim().isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(
-                section.repeatLabel!,
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: colorScheme.primary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-
             if (section.translation.trim().isNotEmpty) ...[
               const SizedBox(height: 22),
-
               Divider(
                 color: colorScheme.outlineVariant.withValues(alpha: 0.35),
               ),
-
               const SizedBox(height: 18),
-
               Text(
                 section.translation,
                 textDirection: TextDirection.rtl,
