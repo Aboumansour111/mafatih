@@ -1,264 +1,680 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 
-import 'screens/home_screen.dart';
-import 'services/theme_service.dart';
+import '../models/quran.dart';
+import '../services/font_size_service.dart';
+import '../widgets/favorite_button.dart';
+import '../widgets/font_size_controls.dart';
+import '../widgets/theme_toggle_button.dart';
 
-void main() {
-  runApp(const MafatihApp());
-}
+class QuranReaderScreen extends StatefulWidget {
+  final QuranSurah surah;
 
-class MafatihApp extends StatefulWidget {
-  const MafatihApp({super.key});
+  const QuranReaderScreen({super.key, required this.surah});
 
   @override
-  State<MafatihApp> createState() => _MafatihAppState();
+  State<QuranReaderScreen> createState() => _QuranReaderScreenState();
 }
 
-class _MafatihAppState extends State<MafatihApp> {
-  late final ThemeService _themeService;
+class _QuranReaderScreenState extends State<QuranReaderScreen> {
+  bool showTranslation = true;
+  double fontSize = FontSizeService.defaultFontSize;
+
+  static const double fontStep = 1;
 
   @override
   void initState() {
     super.initState();
-
-    _themeService = ThemeService();
-
-    _themeService.addListener(_onThemeChanged);
-
-    _themeService.loadTheme();
+    _loadFontSize();
   }
 
-  void _onThemeChanged() {
-    if (mounted) {
-      setState(() {});
+  // ==========================================================
+  // اندازه فونت
+  // ==========================================================
+
+  Future<void> _loadFontSize() async {
+    final savedSize = await FontSizeService.getQuranFontSize();
+
+    if (!mounted) return;
+
+    setState(() {
+      fontSize = savedSize;
+    });
+  }
+
+  Future<void> _increaseFontSize() async {
+    if (fontSize < FontSizeService.maxFontSize) {
+      setState(() {
+        fontSize += fontStep;
+      });
+
+      await FontSizeService.setQuranFontSize(fontSize);
     }
   }
 
-  @override
-  void dispose() {
-    _themeService.removeListener(_onThemeChanged);
-    _themeService.dispose();
+  Future<void> _decreaseFontSize() async {
+    if (fontSize > FontSizeService.minFontSize) {
+      setState(() {
+        fontSize -= fontStep;
+      });
 
-    super.dispose();
+      await FontSizeService.setQuranFontSize(fontSize);
+    }
+  }
+
+  // ==========================================================
+  // کپی متن قرآن
+  // ==========================================================
+
+  String _buildCopyText() {
+    final buffer = StringBuffer();
+
+    buffer.writeln(widget.surah.name);
+
+    if (widget.surah.arabicName.trim().isNotEmpty) {
+      buffer.writeln(widget.surah.arabicName);
+    }
+
+    buffer.writeln();
+    buffer.writeln('بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ');
+    buffer.writeln();
+
+    for (final verse in widget.surah.verses) {
+      buffer.writeln('آیه ${verse.number}');
+      buffer.writeln();
+      buffer.writeln(verse.arabic.trim());
+
+      if (showTranslation && verse.translation.trim().isNotEmpty) {
+        buffer.writeln();
+        buffer.writeln('ترجمه:');
+        buffer.writeln(verse.translation.trim());
+      }
+
+      buffer.writeln();
+    }
+
+    return buffer.toString().trim();
+  }
+
+  Future<void> _copyVerseText(QuranVerse verse) async {
+    final buffer = StringBuffer();
+    buffer.writeln('آیه ${verse.number}');
+    if (verse.arabic.trim().isNotEmpty) {
+      buffer.writeln(verse.arabic.trim());
+    }
+
+    if (showTranslation && verse.translation.trim().isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('ترجمه:');
+      buffer.writeln(verse.translation.trim());
+    }
+
+    final text = buffer.toString().trim();
+    if (text.isEmpty) return;
+
+    await Clipboard.setData(ClipboardData(text: text));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'آیه با موفقیت کپی شد.',
+          textDirection: TextDirection.rtl,
+        ),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  Future<void> _copyText() async {
+    final text = _buildCopyText();
+
+    if (text.isEmpty) {
+      return;
+    }
+
+    await Clipboard.setData(ClipboardData(text: text));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'متن قرآن کپی شد.',
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.right,
+        ),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return ThemeScope(
-      themeService: _themeService,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = colorScheme.primary;
 
-        title: 'مفاتیح یمانی',
+    return Scaffold(
+      body: SafeArea(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // =========================================================
+            // هدر
+            // =========================================================
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(18, 16, 12, 20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [
+                        primary,
+                        Color.lerp(
+                              primary,
+                              isDark
+                                  ? const Color(0xff071d19)
+                                  : const Color(0xff003f38),
+                              0.62,
+                            ) ??
+                            primary,
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primary.withValues(alpha: 0.22),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        left: -45,
+                        top: -45,
+                        child: Container(
+                          width: 135,
+                          height: 135,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.07),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: -35,
+                        bottom: -55,
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.035),
+                          ),
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // =================================================
+                          // دکمه‌های بالا
+                          // =================================================
+                          Row(
+                            children: [
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.13),
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.10),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.menu_book_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              const Spacer(),
 
-        theme: _lightTheme(),
+                              IconButton(
+                                tooltip: 'کپی متن',
+                                onPressed: _copyText,
+                                icon: const Icon(
+                                  Icons.copy_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
 
-        darkTheme: _darkTheme(),
+                              FontSizeControls(
+                                onIncrease: _increaseFontSize,
+                                onDecrease: _decreaseFontSize,
+                                canIncrease:
+                                    fontSize < FontSizeService.maxFontSize,
+                                canDecrease:
+                                    fontSize > FontSizeService.minFontSize,
+                                iconColor: Colors.white,
+                              ),
 
-        themeMode: _themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+                              const SizedBox(width: 4),
 
-        home: const HomeScreen(),
+                              FavoriteButton(
+                                id: widget.surah.id,
+                                size: 25,
+                                iconColor: Colors.white,
+                              ),
+
+                              const SizedBox(width: 2),
+
+                              const ThemeToggleButton(iconColor: Colors.white),
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          Text(
+                            widget.surah.name,
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 25,
+                              fontWeight: FontWeight.w800,
+                              height: 1.5,
+                            ),
+                          ),
+
+                          const SizedBox(height: 2),
+
+                          Text(
+                            widget.surah.arabicName,
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.82),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              height: 1.8,
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          Row(
+                            textDirection: TextDirection.rtl,
+                            children: [
+                              _buildHeaderChip(
+                                icon: Icons.format_list_numbered_rounded,
+                                text: '${widget.surah.versesCount} آیه',
+                              ),
+                              const SizedBox(width: 8),
+                              _buildHeaderChip(
+                                icon: Icons.auto_awesome_rounded,
+                                text: 'قرآن کریم',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+            // =========================================================
+            // کنترل ترجمه
+            // =========================================================
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: primary.withValues(alpha: 0.08)),
+                  ),
+                  child: Row(
+                    textDirection: TextDirection.rtl,
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          Icons.translate_rounded,
+                          color: primary,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'ترجمه آیات',
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                color: colorScheme.onSurface,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              showTranslation
+                                  ? 'ترجمه نمایش داده می‌شود'
+                                  : 'فقط متن عربی نمایش داده می‌شود',
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                color: colorScheme.onSurfaceVariant,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: showTranslation,
+                        onChanged: (value) {
+                          setState(() {
+                            showTranslation = value;
+                          });
+                        },
+                        activeThumbColor: primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+            // =========================================================
+            // بسم الله
+            // =========================================================
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: primary.withValues(alpha: 0.20),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            color: primary.withValues(alpha: 0.75),
+                            size: 17,
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: primary.withValues(alpha: 0.20),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Text(
+                      'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ',
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w700,
+                        height: 2,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: primary.withValues(alpha: 0.20),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            color: primary.withValues(alpha: 0.75),
+                            size: 17,
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: primary.withValues(alpha: 0.20),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+            // =========================================================
+            // آیات
+            // =========================================================
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 35),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final verse = widget.surah.verses[index];
+                  return _buildVerse(verse, index);
+                }, childCount: widget.surah.verses.length),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  ThemeData _lightTheme() {
-    return ThemeData(
-      useMaterial3: true,
-
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xff00695c),
-        brightness: Brightness.light,
+  Widget _buildHeaderChip({required IconData icon, required String text}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.11),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
       ),
-
-      scaffoldBackgroundColor: const Color(0xfffaf6ef),
-
-      textTheme: GoogleFonts.vazirmatnTextTheme().apply(
-        fontFamily: _themeService.fontFamily,
-      ),
-
-      fontFamily: _themeService.fontFamily,
-
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        backgroundColor: Color(0xff00695c),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-
-      cardColor: Colors.white,
-
-      dividerColor: const Color(0xff00695c).withValues(alpha: 0.2),
-    );
-  }
-
-  ThemeData _darkTheme() {
-    const background = Color(0xff102824);
-    const surface = Color(0xff18352f);
-    const surfaceVariant = Color(0xff20423a);
-
-    const primary = Color(0xff26a69a);
-    const primaryLight = Color(0xff4db6ac);
-
-    const textPrimary = Color(0xfff1f7f4);
-    const textSecondary = Color(0xffc5d8d2);
-    const textMuted = Color(0xff91aaa3);
-
-    return ThemeData(
-      useMaterial3: true,
-
-      brightness: Brightness.dark,
-
-      colorScheme: const ColorScheme.dark(
-        primary: primaryLight,
-        onPrimary: Colors.white,
-
-        secondary: primary,
-        onSecondary: Colors.white,
-
-        surface: surface,
-        onSurface: textPrimary,
-
-        surfaceContainerHighest: surfaceVariant,
-
-        error: Color(0xffff7676),
-        onError: Colors.white,
-      ),
-
-      scaffoldBackgroundColor: background,
-
-      textTheme: GoogleFonts.vazirmatnTextTheme(ThemeData.dark().textTheme)
-          .apply(
-            bodyColor: textPrimary,
-            displayColor: textPrimary,
-            fontFamily: _themeService.fontFamily,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 15),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            textDirection: TextDirection.rtl,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-
-      fontFamily: _themeService.fontFamily,
-
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-
-        backgroundColor: Color(0xff12302b),
-
-        foregroundColor: textPrimary,
-
-        elevation: 0,
-
-        scrolledUnderElevation: 0,
-
-        titleTextStyle: TextStyle(
-          color: textPrimary,
-          fontSize: 19,
-          fontWeight: FontWeight.bold,
-        ),
-
-        iconTheme: IconThemeData(color: textPrimary),
-      ),
-
-      cardColor: surface,
-
-      dividerColor: primary.withValues(alpha: 0.28),
-
-      iconTheme: const IconThemeData(color: Color(0xffb8d5ce)),
-
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return primaryLight;
-          }
-
-          return const Color(0xff78918a);
-        }),
-
-        trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return primary.withValues(alpha: 0.45);
-          }
-
-          return const Color(0xff2b4640);
-        }),
-
-        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return primary.withValues(alpha: 0.6);
-          }
-
-          return const Color(0xff557069);
-        }),
-      ),
-
-      inputDecorationTheme: const InputDecorationTheme(
-        filled: true,
-
-        fillColor: surface,
-
-        hintStyle: TextStyle(color: textMuted),
-      ),
-
-      listTileTheme: const ListTileThemeData(
-        tileColor: surface,
-
-        textColor: textPrimary,
-
-        iconColor: primaryLight,
-
-        subtitleTextStyle: TextStyle(color: textSecondary),
-      ),
-
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: surface,
-        surfaceTintColor: Colors.transparent,
-      ),
-
-      dialogTheme: const DialogThemeData(
-        backgroundColor: surface,
-
-        surfaceTintColor: Colors.transparent,
-
-        titleTextStyle: TextStyle(
-          color: textPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-
-        contentTextStyle: TextStyle(color: textSecondary, fontSize: 16),
-      ),
-
-      snackBarTheme: const SnackBarThemeData(
-        backgroundColor: Color(0xff23443d),
-
-        contentTextStyle: TextStyle(color: textPrimary),
-      ),
-
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
+        ],
       ),
     );
   }
-}
 
-class ThemeScope extends InheritedWidget {
-  final ThemeService themeService;
+  Widget _buildVerse(QuranVerse verse, int index) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = colorScheme.primary;
 
-  const ThemeScope({
-    super.key,
-    required this.themeService,
-    required super.child,
-  });
+    return GestureDetector(
+      onLongPress: () => _copyVerseText(verse),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 18),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.72),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: primary.withValues(alpha: isDark ? 0.10 : 0.07),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            children: [
+              Positioned(
+                left: -32,
+                bottom: -32,
+                child: Container(
+                  width: 95,
+                  height: 95,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: primary.withValues(alpha: 0.05),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
 
-  static ThemeService of(BuildContext context) {
-    final scope = context.dependOnInheritedWidgetOfExactType<ThemeScope>();
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      verse.arabic,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.justify,
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: fontSize,
+                        height: 2.35,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
 
-    assert(scope != null, 'ThemeScope در بالای این Widget وجود ندارد.');
+                    const SizedBox(height: 14),
 
-    return scope!.themeService;
-  }
+                    Row(
+                      children: [
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
+                              colors: [
+                                primary.withValues(alpha: 0.20),
+                                primary.withValues(alpha: 0.07),
+                              ],
+                            ),
+                            border: Border.all(
+                              color: primary.withValues(alpha: 0.15),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${verse.number}',
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
 
-  @override
-  bool updateShouldNotify(ThemeScope oldWidget) {
-    return themeService != oldWidget.themeService;
+                        const SizedBox(width: 10),
+
+                        Expanded(
+                          child: Divider(
+                            color: primary.withValues(alpha: 0.13),
+                          ),
+                        ),
+
+                        const SizedBox(width: 10),
+
+                        Text(
+                          'آیه',
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    if (showTranslation &&
+                        verse.translation.trim().isNotEmpty) ...[
+                      const SizedBox(height: 14),
+
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.045),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          verse.translation,
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: fontSize * 0.70,
+                            height: 2.05,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

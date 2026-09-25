@@ -269,15 +269,20 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                                     fontSize < FontSizeService.maxFontSize,
                                 canDecrease:
                                     fontSize > FontSizeService.minFontSize,
+                                iconColor: Colors.white,
                               ),
 
                               const SizedBox(width: 4),
 
-                              FavoriteButton(id: widget.surah.id, size: 25),
+                              FavoriteButton(
+                                id: widget.surah.id,
+                                size: 25,
+                                iconColor: Colors.white,
+                              ),
 
                               const SizedBox(width: 2),
 
-                              const ThemeToggleButton(),
+                              const ThemeToggleButton(iconColor: Colors.white),
                             ],
                           ),
 

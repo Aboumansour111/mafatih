@@ -5,8 +5,14 @@ import '../services/favorite_service.dart';
 class FavoriteButton extends StatefulWidget {
   final String id;
   final double size;
+  final Color? iconColor;
 
-  const FavoriteButton({super.key, required this.id, this.size = 27});
+  const FavoriteButton({
+    super.key,
+    required this.id,
+    this.size = 27,
+    this.iconColor,
+  });
 
   @override
   State<FavoriteButton> createState() => _FavoriteButtonState();
@@ -63,12 +69,14 @@ class _FavoriteButtonState extends State<FavoriteButton> {
       return SizedBox(width: widget.size + 20, height: widget.size + 20);
     }
 
+    final inactiveColor = widget.iconColor ?? Colors.grey;
+
     return IconButton(
       tooltip: _isFavorite ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها',
       onPressed: _toggleFavorite,
       icon: Icon(
         _isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-        color: _isFavorite ? Colors.red : Colors.grey,
+        color: _isFavorite ? Colors.redAccent : inactiveColor,
         size: widget.size,
       ),
     );
