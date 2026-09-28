@@ -205,9 +205,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withValues(
-              alpha: isDark ? 0.18 : 0.22,
-            ),
+            color: colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.22),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -221,9 +219,7 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.13),
               borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
             ),
             child: const Icon(
               Icons.mosque_rounded,
@@ -289,18 +285,49 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (widget.ziyarat.sections.length > 1)
+            if (widget.ziyarat.sections.length > 1 ||
+                (section.repeatLabel != null &&
+                    section.repeatLabel!.trim().isNotEmpty))
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: Text(
-                  'بخش ${index + 1}',
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  children: [
+                    if (section.repeatLabel != null &&
+                        section.repeatLabel!.trim().isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: colorScheme.primary.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Text(
+                          'تکرار: ${section.repeatLabel}',
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    const Spacer(),
+                    if (widget.ziyarat.sections.length > 1)
+                      Text(
+                        'بخش ${index + 1}',
+                        textDirection: TextDirection.rtl,
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             if (section.arabic.trim().isNotEmpty)

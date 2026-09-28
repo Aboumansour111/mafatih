@@ -31,6 +31,7 @@ flutter:
     - lib/data/ziyarat.json
     - lib/data/quran.json
     - lib/data/amals.json
+    - assets/images/mafatih_yamani_logo.jpg
 
   fonts:
     - family: Vazirmatn
