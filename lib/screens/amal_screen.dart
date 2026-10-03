@@ -382,6 +382,32 @@ class _AmalScreenState extends State<AmalScreen> {
                   ),
                 ),
               ),
+            if ((section.repeatLabel ?? '').trim().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(
+                      section.repeatLabel!.trim(),
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             if (section.arabic.trim().isNotEmpty)
               Text(
                 section.arabic,

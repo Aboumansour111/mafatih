@@ -1,13 +1,19 @@
 class DuaSection {
   final String arabic;
   final String translation;
+  final String? repeatLabel;
 
-  DuaSection({required this.arabic, required this.translation});
+  DuaSection({
+    required this.arabic,
+    required this.translation,
+    this.repeatLabel,
+  });
 
   factory DuaSection.fromJson(Map<String, dynamic> json) {
     return DuaSection(
       arabic: json['arabic'] ?? '',
       translation: json['translation'] ?? '',
+      repeatLabel: json['repeatLabel'] as String?,
     );
   }
 }
@@ -86,6 +92,7 @@ class Dua {
         translation: index < translationParts.length
             ? translationParts[index]
             : '',
+        repeatLabel: null,
       ),
     );
   }

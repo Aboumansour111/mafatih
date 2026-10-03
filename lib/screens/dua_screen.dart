@@ -169,68 +169,82 @@ class _DuaScreenState extends State<DuaScreen> {
                   _buildHeroHeader(colorScheme, isDark),
                   const SizedBox(height: 22),
                   // کنترل نمایش ترجمه
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-                  ),
-                ),
-                child: Row(
-                  textDirection: TextDirection.rtl,
-                  children: [
-                    Icon(
-                      showTranslation ? Icons.translate : Icons.translate_outlined,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary
+                              .withValues(alpha: 0.08),
+                        ),
+                      ),
+                      child: Row(
                         textDirection: TextDirection.rtl,
                         children: [
-                          Text(
-                            'ترجمه',
-                            textDirection: TextDirection.rtl,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                          Icon(
+                            showTranslation
+                                ? Icons.translate
+                                : Icons.translate_outlined,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 22,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              textDirection: TextDirection.rtl,
+                              children: [
+                                Text(
+                                  'ترجمه',
+                                  textDirection: TextDirection.rtl,
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  showTranslation
+                                      ? 'ترجمه نمایش داده می‌شود'
+                                      : 'ترجمه مخفی است',
+                                  textDirection: TextDirection.rtl,
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Text(
-                            showTranslation
-                                ? 'ترجمه نمایش داده می‌شود'
-                                : 'ترجمه مخفی است',
-                            textDirection: TextDirection.rtl,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              fontSize: 11,
-                            ),
+                          Switch(
+                            value: showTranslation,
+                            onChanged: (value) {
+                              setState(() {
+                                showTranslation = value;
+                              });
+                            },
+                            activeThumbColor: Theme.of(context)
+                                .colorScheme
+                                .primary,
                           ),
                         ],
                       ),
                     ),
-                    Switch(
-                      value: showTranslation,
-                      onChanged: (value) {
-                        setState(() {
-                          showTranslation = value;
-                        });
-                      },
-                      activeThumbColor: Theme.of(context).colorScheme.primary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
 
-            ...List.generate(widget.dua.sections.length, (index) {
+                  ...List.generate(widget.dua.sections.length, (index) {
                     return _buildSection(
                       widget.dua.sections[index],
                       index,
@@ -359,6 +373,32 @@ class _DuaScreenState extends State<DuaScreen> {
                     color: colorScheme.primary,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            if ((section.repeatLabel ?? '').trim().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(
+                      section.repeatLabel!.trim(),
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ),
