@@ -18,6 +18,7 @@ class DuaScreen extends StatefulWidget {
 }
 
 class _DuaScreenState extends State<DuaScreen> {
+  bool showTranslation = true;
   double fontSize = FontSizeService.defaultFontSize;
 
   static const double fontStep = 1;
@@ -68,7 +69,7 @@ class _DuaScreenState extends State<DuaScreen> {
       if (section.arabic.trim().isNotEmpty) {
         buffer.writeln(section.arabic.trim());
       }
-      if (section.translation.trim().isNotEmpty) {
+      if (showTranslation && section.translation.trim().isNotEmpty) {
         buffer.writeln();
         buffer.writeln('ترجمه:');
         buffer.writeln(section.translation.trim());
@@ -104,7 +105,7 @@ class _DuaScreenState extends State<DuaScreen> {
     if (section.arabic.trim().isNotEmpty) {
       buffer.writeln(section.arabic.trim());
     }
-    if (section.translation.trim().isNotEmpty) {
+    if (showTranslation && section.translation.trim().isNotEmpty) {
       buffer.writeln();
       buffer.writeln('ترجمه:');
       buffer.writeln(section.translation.trim());
@@ -167,7 +168,69 @@ class _DuaScreenState extends State<DuaScreen> {
                 children: [
                   _buildHeroHeader(colorScheme, isDark),
                   const SizedBox(height: 22),
-                  ...List.generate(widget.dua.sections.length, (index) {
+                  // کنترل نمایش ترجمه
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                  ),
+                ),
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    Icon(
+                      showTranslation ? Icons.translate : Icons.translate_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        textDirection: TextDirection.rtl,
+                        children: [
+                          Text(
+                            'ترجمه',
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            showTranslation
+                                ? 'ترجمه نمایش داده می‌شود'
+                                : 'ترجمه مخفی است',
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: showTranslation,
+                      onChanged: (value) {
+                        setState(() {
+                          showTranslation = value;
+                        });
+                      },
+                      activeThumbColor: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            ...List.generate(widget.dua.sections.length, (index) {
                     return _buildSection(
                       widget.dua.sections[index],
                       index,
@@ -311,7 +374,7 @@ class _DuaScreenState extends State<DuaScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-            if (section.translation.trim().isNotEmpty) ...[
+            if (showTranslation && section.translation.trim().isNotEmpty) ...[
               const SizedBox(height: 22),
               Divider(
                 color: colorScheme.outlineVariant.withValues(alpha: 0.35),
