@@ -1,6 +1,6 @@
 name: mafatih_yamani
-description: "A new Flutter project."
-publish_to: 'none'
+description: "مفاتیح یمانی — ادعیه، زیارات و اعمال"
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.10
@@ -19,7 +18,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^6.0.0
 
 flutter:
@@ -31,27 +29,21 @@ flutter:
     - lib/data/ziyarat.json
     - lib/data/quran.json
     - lib/data/amals.json
-    - assets/images/mafatih_yamani_logo.jpg
+    - assets/images/logo.jpg
 
   fonts:
     - family: Vazirmatn
       fonts:
         - asset: assets/fonts/Vazirmatn-Regular.ttf
-
     - family: Shabnam
       fonts:
         - asset: assets/fonts/Shabnam.ttf
-
     - family: Sahel
       fonts:
         - asset: assets/fonts/Sahel.ttf
-
     - family: Samim
       fonts:
         - asset: assets/fonts/Samim.ttf
-
     - family: Estedad
       fonts:
         - asset: assets/fonts/Estedad.ttf
-
-    
