@@ -47,6 +47,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
       return _buildZiyaratScreen();
     }
 
+    if (widget.category.id == 'quran') {
+      return _buildQuranScreen();
+    }
+
+    if (widget.category.id == 'other') {
+      return _buildOtherScreen();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.category.title),
@@ -58,6 +66,164 @@ class _CategoryScreenState extends State<CategoryScreen> {
           'محتوای این بخش به‌زودی اضافه می‌شود.',
           style: TextStyle(fontSize: 16),
         ),
+      ),
+    );
+  }
+
+  // ==========================================================
+  // ملحقات (other)
+  // ==========================================================
+  Widget _buildOtherScreen() {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.category.title),
+        centerTitle: true,
+        actions: const [ThemeToggleButton(), SizedBox(width: 8)],
+      ),
+      body: FutureBuilder<List<dynamic>>(
+        future: Future.wait([
+          _contentService.loadDuas(),
+          _contentService.loadAmals(),
+        ]),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'خطا در بارگذاری ملحقات\n\n${snapshot.error}',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
+
+          final duas = (snapshot.data?[0] as List<Dua>?) ?? <Dua>[];
+          final amals = (snapshot.data?[1] as List<Amal>?) ?? <Amal>[];
+
+          final otherDuas = duas.where((d) => d.category == 'other').toList();
+          final otherAmals = amals.where((a) => a.category == 'other').toList();
+
+          final items = <dynamic>[...otherDuas, ...otherAmals];
+
+          if (items.isEmpty) {
+            return const Center(
+              child: Text(
+                'هنوز موردی در ملحقات اضافه نشده است.',
+                style: TextStyle(fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+
+              if (item is Dua) {
+                return _buildContentCard(
+                  id: FavoriteService().duaId(item.id),
+                  title: item.title,
+                  icon: Icons.auto_stories_rounded,
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      AppRoutes.slide(DuaScreen(dua: item)),
+                    );
+                    if (mounted) setState(() {});
+                  },
+                );
+              }
+
+              if (item is Amal) {
+                return _buildContentCard(
+                  id: FavoriteService().amalId(item.id),
+                  title: item.title,
+                  icon: Icons.menu_book_rounded,
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      AppRoutes.slide(AmalScreen(amal: item)),
+                    );
+                    if (mounted) setState(() {});
+                  },
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  // ==========================================================
+  // قرآن
+  // ==========================================================
+  Widget _buildQuranScreen() {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.category.title),
+        centerTitle: true,
+        actions: const [ThemeToggleButton(), SizedBox(width: 8)],
+      ),
+      body: FutureBuilder<List<QuranSurah>>(
+        future: _contentService.loadQuran(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'خطا در بارگذاری قرآن\n\n${snapshot.error}',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
+
+          final surahs = snapshot.data ?? [];
+
+          if (surahs.isEmpty) {
+            return const Center(
+              child: Text(
+                'هنوز سوره‌ای اضافه نشده است.',
+                style: TextStyle(fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: surahs.length,
+            itemBuilder: (context, index) {
+              final surah = surahs[index];
+              return _buildContentCard(
+                id: surah.id,
+                title: surah.name,
+                icon: Icons.menu_book_rounded,
+                subtitle: '${surah.versesCount} آیه',
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    AppRoutes.slide(QuranReaderScreen(surah: surah)),
+                  );
+                  if (mounted) setState(() {});
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -218,18 +384,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  // ==========================================================
-  // علاقه‌مندی‌ها
-  // ==========================================================
   Future<Set<String>> _getFavoriteIds() async {
     final service = FavoriteService();
-
     return service.getFavorites();
   }
 
-  // ==========================================================
-  // بارگذاری تمام محتوا
-  // ==========================================================
   Future<List<dynamic>> _loadAllContent() async {
     final duas = await _contentService.loadDuas();
     final amals = await _contentService.loadAmals();
@@ -239,9 +398,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
     return [...duas, ...amals, ...ziyarat, ...quran];
   }
 
-  // ==========================================================
-  // شناسه علاقه‌مندی
-  // ==========================================================
   String _getContentFavoriteId(dynamic item) {
     final service = FavoriteService();
 
@@ -490,6 +646,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
     subcategories.sort();
 
+    final hasUncategorized = amals.any((amal) => amal.subcategory.isEmpty);
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -507,6 +665,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
             },
           ),
         ),
+        if (hasUncategorized)
+          _buildSubcategoryCard(
+            item: const _SubcategoryItem(
+              id: '',
+              title: 'سایر اعمال',
+              icon: Icons.more_horiz_rounded,
+            ),
+            onTap: () {
+              setState(() {
+                _selectedSubcategory = '';
+              });
+            },
+          ),
       ],
     );
   }
@@ -555,6 +726,30 @@ class _CategoryScreenState extends State<CategoryScreen> {
         return Icons.shield_rounded;
 
       case 'سجده شکر':
+        return Icons.volunteer_activism_rounded;
+
+      case 'daily':
+      case 'اعمال روزانه':
+        return Icons.today_rounded;
+
+      case 'weekly':
+      case 'اعمال هفتگی':
+        return Icons.view_week_rounded;
+
+      case 'monthly':
+      case 'اعمال ماهانه':
+        return Icons.calendar_month_rounded;
+
+      case 'occasional':
+      case 'اعمال مناسبتی':
+        return Icons.event_rounded;
+
+      case 'prayers':
+      case 'نمازها':
+        return Icons.mosque_rounded;
+
+      case 'needs':
+      case 'اعمال حاجات':
         return Icons.volunteer_activism_rounded;
 
       case 'رجب':
