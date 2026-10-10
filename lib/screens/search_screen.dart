@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../models/amal.dart';
 import '../models/dua.dart';
 import '../models/quran.dart';
 import '../models/ziyarat.dart';
 import '../services/content_service.dart';
+import 'amal_screen.dart';
 import 'dua_screen.dart';
 import 'quran_reader_screen.dart';
 import 'ziyarat_screen.dart';
 
 enum SearchMode { titleOnly, titleAndContent }
 
-enum SearchResultType { dua, ziyarat, quran }
+enum SearchResultType { dua, ziyarat, quran, amal }
 
 class SearchResult {
   final String title;
@@ -42,6 +44,7 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Dua> _duas = [];
   List<Ziyarat> _ziyarats = [];
   List<QuranSurah> _quran = [];
+  List<Amal> _amals = [];
 
   List<SearchResult> _results = [];
 
@@ -65,6 +68,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _contentService.loadDuas(),
         _contentService.loadZiyarat(),
         _contentService.loadQuran(),
+        _contentService.loadAmals(),
       ]);
 
       if (!mounted) return;
@@ -73,6 +77,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _duas = results[0] as List<Dua>;
         _ziyarats = results[1] as List<Ziyarat>;
         _quran = results[2] as List<QuranSurah>;
+        _amals = results[3] as List<Amal>;
         _loading = false;
       });
     } catch (e) {
@@ -118,10 +123,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     final results = <SearchResult>[];
 
-    // ============================================================
     // دعاها
-    // ============================================================
-
     for (final dua in _duas) {
       bool matched = _contains(dua.title, query);
 
@@ -147,10 +149,33 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     }
 
-    // ============================================================
-    // زیارت‌ها
-    // ============================================================
+    // اعمال
+    for (final amal in _amals) {
+      bool matched = _contains(amal.title, query);
 
+      if (_mode == SearchMode.titleAndContent && !matched) {
+        for (final section in amal.sections) {
+          if (_contains(section.arabic, query) ||
+              _contains(section.translation, query)) {
+            matched = true;
+            break;
+          }
+        }
+      }
+
+      if (matched) {
+        results.add(
+          SearchResult(
+            title: amal.title,
+            subtitle: 'اعمال',
+            type: SearchResultType.amal,
+            data: amal,
+          ),
+        );
+      }
+    }
+
+    // زیارت‌ها
     for (final ziyarat in _ziyarats) {
       bool matched = _contains(ziyarat.title, query);
 
@@ -176,10 +201,7 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     }
 
-    // ============================================================
     // قرآن
-    // ============================================================
-
     for (final surah in _quran) {
       bool matched =
           _contains(surah.name, query) || _contains(surah.arabicName, query);
@@ -237,6 +259,10 @@ class _SearchScreenState extends State<SearchScreen> {
         page = DuaScreen(dua: result.data as Dua);
         break;
 
+      case SearchResultType.amal:
+        page = AmalScreen(amal: result.data as Amal);
+        break;
+
       case SearchResultType.ziyarat:
         page = ZiyaratScreen(ziyarat: result.data as Ziyarat);
         break;
@@ -253,6 +279,9 @@ class _SearchScreenState extends State<SearchScreen> {
     switch (type) {
       case SearchResultType.dua:
         return Icons.auto_stories_rounded;
+
+      case SearchResultType.amal:
+        return Icons.checklist_rounded;
 
       case SearchResultType.ziyarat:
         return Icons.mosque_rounded;
@@ -442,10 +471,6 @@ class _SearchScreenState extends State<SearchScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // ==================================================
-                // کادر جستجو
-                // ==================================================
-
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   child: TextField(
@@ -471,10 +496,6 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                 ),
-
-                // ==================================================
-                // دو حالت جستجو
-                // ==================================================
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -486,10 +507,6 @@ class _SearchScreenState extends State<SearchScreen> {
                     colorScheme,
                   ),
                 ),
-
-                // ==================================================
-                // نتایج
-                // ==================================================
                 Expanded(
                   child: _controller.text.trim().isEmpty
                       ? _buildEmptyState(context, noResults: false)
