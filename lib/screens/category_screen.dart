@@ -31,6 +31,21 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // اگر داخل زیردسته هستیم، دکمه بک اول زیردسته را می‌بندد نه کل صفحه را
+    return PopScope(
+      canPop: _selectedSubcategory == null,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _selectedSubcategory != null) {
+          setState(() {
+            _selectedSubcategory = null;
+          });
+        }
+      },
+      child: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
     if (widget.category.id == 'favorite') {
       return _buildFavoriteScreen();
     }
@@ -426,16 +441,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
   Widget _buildDuasScreen() {
     return Scaffold(
       appBar: AppBar(
-        leading: _selectedSubcategory != null
-            ? IconButton(
-                icon: const Icon(Icons.arrow_forward_ios_rounded),
-                onPressed: () {
-                  setState(() {
-                    _selectedSubcategory = null;
-                  });
-                },
-              )
-            : null,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_forward_ios_rounded),
+          tooltip: 'بازگشت',
+          onPressed: () {
+            if (_selectedSubcategory != null) {
+              setState(() {
+                _selectedSubcategory = null;
+              });
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
         title: Text(
           _selectedSubcategory == null
               ? widget.category.title
@@ -577,16 +595,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
   Widget _buildAmalScreen() {
     return Scaffold(
       appBar: AppBar(
-        leading: _selectedSubcategory != null
-            ? IconButton(
-                icon: const Icon(Icons.arrow_forward_ios_rounded),
-                onPressed: () {
-                  setState(() {
-                    _selectedSubcategory = null;
-                  });
-                },
-              )
-            : null,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_forward_ios_rounded),
+          tooltip: 'بازگشت',
+          onPressed: () {
+            if (_selectedSubcategory != null) {
+              setState(() {
+                _selectedSubcategory = null;
+              });
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
         title: Text(
           _selectedSubcategory == null
               ? widget.category.title
@@ -786,16 +807,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
   Widget _buildZiyaratScreen() {
     return Scaffold(
       appBar: AppBar(
-        leading: _selectedSubcategory != null
-            ? IconButton(
-                icon: const Icon(Icons.arrow_forward_ios_rounded),
-                onPressed: () {
-                  setState(() {
-                    _selectedSubcategory = null;
-                  });
-                },
-              )
-            : null,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_forward_ios_rounded),
+          tooltip: 'بازگشت',
+          onPressed: () {
+            if (_selectedSubcategory != null) {
+              setState(() {
+                _selectedSubcategory = null;
+              });
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
         title: Text(
           _selectedSubcategory == null
               ? widget.category.title

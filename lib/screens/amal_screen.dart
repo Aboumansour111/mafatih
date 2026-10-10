@@ -134,11 +134,12 @@ class _AmalScreenState extends State<AmalScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.amal.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_forward_ios_rounded),
+          tooltip: 'بازگشت',
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
+        title: const SizedBox.shrink(),
         centerTitle: true,
         actions: [
           IconButton(
@@ -172,82 +173,68 @@ class _AmalScreenState extends State<AmalScreen> {
                   _buildHeroHeader(colorScheme, isDark),
                   const SizedBox(height: 22),
                   // کنترل نمایش ترجمه
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary
-                              .withValues(alpha: 0.08),
-                        ),
-                      ),
-                      child: Row(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                  ),
+                ),
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    Icon(
+                      showTranslation ? Icons.translate : Icons.translate_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         textDirection: TextDirection.rtl,
                         children: [
-                          Icon(
-                            showTranslation
-                                ? Icons.translate
-                                : Icons.translate_outlined,
-                            color: Theme.of(context).colorScheme.primary,
-                            size: 22,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              textDirection: TextDirection.rtl,
-                              children: [
-                                Text(
-                                  'ترجمه',
-                                  textDirection: TextDirection.rtl,
-                                  style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  showTranslation
-                                      ? 'ترجمه نمایش داده می‌شود'
-                                      : 'ترجمه مخفی است',
-                                  textDirection: TextDirection.rtl,
-                                  style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            'ترجمه',
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          Switch(
-                            value: showTranslation,
-                            onChanged: (value) {
-                              setState(() {
-                                showTranslation = value;
-                              });
-                            },
-                            activeThumbColor: Theme.of(context)
-                                .colorScheme
-                                .primary,
+                          Text(
+                            showTranslation
+                                ? 'ترجمه نمایش داده می‌شود'
+                                : 'ترجمه مخفی است',
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+                    Switch(
+                      value: showTranslation,
+                      onChanged: (value) {
+                        setState(() {
+                          showTranslation = value;
+                        });
+                      },
+                      activeThumbColor: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
-                  ...List.generate(widget.amal.sections.length, (index) {
+            ...List.generate(widget.amal.sections.length, (index) {
                     return _buildSection(
                       widget.amal.sections[index],
                       index,
@@ -388,10 +375,7 @@ class _AmalScreenState extends State<AmalScreen> {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: colorScheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(14),

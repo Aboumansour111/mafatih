@@ -131,11 +131,12 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.ziyarat.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_forward_ios_rounded),
+          tooltip: 'بازگشت',
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
+        title: const SizedBox.shrink(),
         centerTitle: true,
         actions: [
           IconButton(
