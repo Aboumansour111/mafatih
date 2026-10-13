@@ -1,7 +1,20 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
+
+  static const _urlMafatihYamani = 'https://t.me/MAFATIH10313';
+  static const _urlAmalArabi = 'https://t.me/MahdiMedia5';
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      // fallback
+      await launchUrl(uri, mode: LaunchMode.platformDefault);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +69,6 @@ class AboutScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // لوگوی ساده (آیکون دایره‌ای)
                   Container(
                     width: 88,
                     height: 88,
@@ -90,47 +102,83 @@ class AboutScreen extends StatelessWidget {
 
             const SizedBox(height: 22),
 
-            // معرفی
+            // معرفی — با لینک‌های قابل‌کلیک روی نام کانال‌ها
             _SectionCard(
               isDark: isDark,
               colorScheme: colorScheme,
               icon: Icons.favorite_rounded,
               title: 'معرفی',
-              child: Text(
-                'این اپلیکیشن توسط جمعی از مومنین به سید احمد الحسن توسعه داده شده است.',
+              child: Text.rich(
+                TextSpan(
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 2.0,
+                    color: colorScheme.onSurface,
+                  ),
+                  children: [
+                    const TextSpan(
+                      text:
+                          'این اپلیکیشن توسط جمعی از مومنین به سید احمد الحسن توسعه داده شده و منابع اصلی برنامه کانال‌های ',
+                    ),
+                    TextSpan(
+                      text: '«مفاتیح یمانی»',
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w800,
+                        decoration: TextDecoration.underline,
+                        decorationColor: primary,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => _openUrl(_urlMafatihYamani),
+                    ),
+                    const TextSpan(text: ' و '),
+                    TextSpan(
+                      text: '«الأعمال العبادية لمجموعة الدعوة المهدوية»',
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w800,
+                        decoration: TextDecoration.underline,
+                        decorationColor: primary,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => _openUrl(_urlAmalArabi),
+                    ),
+                    const TextSpan(
+                      text:
+                          ' و کتاب «مفاتیح الجنان» شیخ عباس قمی می‌باشد.',
+                    ),
+                  ],
+                ),
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.justify,
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 2.0,
-                  color: colorScheme.onSurface,
-                ),
               ),
             ),
 
             const SizedBox(height: 14),
 
-            // منابع
+            // منابع — کارت‌های قابل‌کلیک
             _SectionCard(
               isDark: isDark,
               colorScheme: colorScheme,
               icon: Icons.library_books_rounded,
               title: 'منابع اصلی',
               child: Column(
-                children: const [
+                children: [
                   _SourceItem(
                     title: 'کانال مفاتیح یمانی',
-                    subtitle: 'منبع اصلی ادعیه و اعمال',
+                    subtitle: 'منبع اصلی ادعیه و اعمال — برای ورود لمس کنید',
                     icon: Icons.telegram,
+                    url: _urlMafatihYamani,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _SourceItem(
                     title: 'الأعمال العبادية لمجموعة الدعوة المهدوية',
-                    subtitle: 'کانال عربی اعمال عبادی',
+                    subtitle: 'کانال عربی اعمال عبادی — برای ورود لمس کنید',
                     icon: Icons.telegram,
+                    url: _urlAmalArabi,
                   ),
-                  SizedBox(height: 10),
-                  _SourceItem(
+                  const SizedBox(height: 10),
+                  const _SourceItem(
                     title: 'مفاتیح الجنان',
                     subtitle: 'اثر شیخ عباس قمی',
                     icon: Icons.menu_book_rounded,
@@ -220,22 +268,36 @@ class _SourceItem extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  final String? url;
 
   const _SourceItem({
     required this.title,
     required this.subtitle,
     required this.icon,
+    this.url,
   });
+
+  Future<void> _open() async {
+    if (url == null) return;
+    final uri = Uri.parse(url!);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      await launchUrl(uri, mode: LaunchMode.platformDefault);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final hasLink = url != null && url!.isNotEmpty;
 
-    return Container(
+    final content = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: colorScheme.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(14),
+        border: hasLink
+            ? Border.all(color: colorScheme.primary.withValues(alpha: 0.22))
+            : null,
       ),
       child: Row(
         children: [
@@ -251,7 +313,10 @@ class _SourceItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
+                    color: hasLink ? colorScheme.primary : colorScheme.onSurface,
+                    decoration:
+                        hasLink ? TextDecoration.underline : TextDecoration.none,
+                    decorationColor: colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -266,7 +331,26 @@ class _SourceItem extends StatelessWidget {
               ],
             ),
           ),
+          if (hasLink) ...[
+            const SizedBox(width: 8),
+            Icon(
+              Icons.open_in_new_rounded,
+              size: 16,
+              color: colorScheme.primary.withValues(alpha: 0.8),
+            ),
+          ],
         ],
+      ),
+    );
+
+    if (!hasLink) return content;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: _open,
+        child: content,
       ),
     );
   }
