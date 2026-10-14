@@ -5,22 +5,22 @@
     "icon": "dua",
     "subcategories": [
       {
-        "id": "famous",
+        "id": "مشهور",
         "title": "ادعیه مشهور",
         "icon": "auto_stories"
       },
       {
-        "id": "daily",
+        "id": "روزانه",
         "title": "ادعیه روزانه",
         "icon": "today"
       },
       {
-        "id": "occasional",
+        "id": "مناسبتی",
         "title": "ادعیه مناسبتی",
         "icon": "event"
       },
       {
-        "id": "needs",
+        "id": "حاجات",
         "title": "ادعیه حاجات",
         "icon": "volunteer_activism"
       }
@@ -32,32 +32,32 @@
     "icon": "calendar",
     "subcategories": [
       {
-        "id": "daily",
+        "id": "روزانه",
         "title": "اعمال روزانه",
         "icon": "today"
       },
       {
-        "id": "weekly",
+        "id": "هفتگی",
         "title": "اعمال هفتگی",
         "icon": "view_week"
       },
       {
-        "id": "monthly",
+        "id": "ماهانه",
         "title": "اعمال ماهانه",
         "icon": "calendar_month"
       },
       {
-        "id": "occasional",
+        "id": "مناسبتی",
         "title": "اعمال مناسبتی",
         "icon": "event"
       },
       {
-        "id": "prayers",
+        "id": "نمازها",
         "title": "نمازها",
         "icon": "mosque"
       },
       {
-        "id": "needs",
+        "id": "حاجات",
         "title": "اعمال حاجات",
         "icon": "volunteer_activism"
       }
@@ -69,22 +69,22 @@
     "icon": "mosque",
     "subcategories": [
       {
-        "id": "famous",
+        "id": "مشهور",
         "title": "زیارات مشهور",
         "icon": "auto_stories"
       },
       {
-        "id": "imams",
+        "id": "ائمه",
         "title": "زیارات ائمه",
         "icon": "person"
       },
       {
-        "id": "ahl_al_bayt",
+        "id": "اهل‌بیت",
         "title": "زیارات اهل‌بیت و اصحاب",
         "icon": "groups"
       },
       {
-        "id": "occasional",
+        "id": "مناسبتی",
         "title": "زیارات مناسبتی",
         "icon": "event"
       }
