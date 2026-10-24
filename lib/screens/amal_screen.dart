@@ -65,10 +65,6 @@ class _AmalScreenState extends State<AmalScreen> {
 
     for (var i = 0; i < widget.amal.sections.length; i++) {
       final section = widget.amal.sections[i];
-      if (widget.amal.sections.length > 1) {
-        buffer.writeln('بخش ${i + 1}');
-        buffer.writeln();
-      }
       if (section.arabic.trim().isNotEmpty) {
         buffer.writeln(section.arabic.trim());
       }
@@ -101,10 +97,6 @@ class _AmalScreenState extends State<AmalScreen> {
 
   Future<void> _copySectionText(AmalSection section, int index) async {
     final buffer = StringBuffer();
-    if (widget.amal.sections.length > 1) {
-      buffer.writeln('بخش ${index + 1}');
-      buffer.writeln();
-    }
     if (section.arabic.trim().isNotEmpty) {
       buffer.writeln(section.arabic.trim());
     }
@@ -355,20 +347,6 @@ class _AmalScreenState extends State<AmalScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (widget.amal.sections.length > 1)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Text(
-                  'بخش ${index + 1}',
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
             if ((section.repeatLabel ?? '').trim().isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
