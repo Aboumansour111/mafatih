@@ -62,10 +62,6 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
 
     for (var i = 0; i < widget.ziyarat.sections.length; i++) {
       final section = widget.ziyarat.sections[i];
-      if (widget.ziyarat.sections.length > 1) {
-        buffer.writeln('بخش ${i + 1}');
-        buffer.writeln();
-      }
       if (section.arabic.trim().isNotEmpty) {
         buffer.writeln(section.arabic.trim());
       }
@@ -98,10 +94,6 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
 
   Future<void> _copySectionText(ZiyaratSection section, int index) async {
     final buffer = StringBuffer();
-    if (widget.ziyarat.sections.length > 1) {
-      buffer.writeln('بخش ${index + 1}');
-      buffer.writeln();
-    }
     if (section.arabic.trim().isNotEmpty) {
       buffer.writeln(section.arabic.trim());
     }
@@ -317,16 +309,6 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
               height: 1.6,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            '${widget.ziyarat.sections.length} بخش',
-            textDirection: TextDirection.rtl,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.75),
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
         ],
       ),
     );
@@ -363,20 +345,6 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (widget.ziyarat.sections.length > 1)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Text(
-                  'بخش ${index + 1}',
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
             if ((section.repeatLabel ?? '').trim().isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
