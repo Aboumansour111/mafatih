@@ -326,8 +326,8 @@ class _AmalScreenState extends State<AmalScreen> {
       onLongPress: () => _copySectionText(section, index),
       child: Container(
         width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 18),
-        padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(26),
@@ -383,11 +383,11 @@ class _AmalScreenState extends State<AmalScreen> {
                 ),
               ),
             if (showTranslation && section.translation.trim().isNotEmpty) ...[
-              const SizedBox(height: 22),
+              const SizedBox(height: 14),
               Divider(
                 color: colorScheme.outlineVariant.withValues(alpha: 0.35),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
               Text(
                 section.translation,
                 textDirection: TextDirection.rtl,
