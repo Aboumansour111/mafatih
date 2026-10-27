@@ -320,12 +320,16 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
     ColorScheme colorScheme,
     bool isDark,
   ) {
+    final hasRepeat = (section.repeatLabel ?? '').trim().isNotEmpty;
+    final hasArabic = section.arabic.trim().isNotEmpty;
+    final hasTranslation =
+        showTranslation && section.translation.trim().isNotEmpty;
+
     return GestureDetector(
       onLongPress: () => _copySectionText(section, index),
       child: Container(
         width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(26),
@@ -342,92 +346,167 @@ class _ZiyaratScreenState extends State<ZiyaratScreen> {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if ((section.repeatLabel ?? '').trim().isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          colorScheme.primary.withValues(alpha: isDark ? 0.28 : 0.16),
-                          colorScheme.tertiary.withValues(alpha: isDark ? 0.22 : 0.12),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: colorScheme.primary.withValues(alpha: 0.35),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorScheme.primary.withValues(alpha: 0.12),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.repeat_rounded,
-                          size: 16,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          section.repeatLabel!.trim(),
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            color: colorScheme.primary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.2,
-                          ),
-                        ),
-                      ],
-                    ),
+        clipBehavior: Clip.antiAlias,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // نوار باریک تأکیدی (در RTL سمت راست متن قرار می‌گیرد)
+              Container(
+                width: 3.5,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      colorScheme.primary.withValues(alpha: isDark ? 0.85 : 0.75),
+                      colorScheme.tertiary.withValues(alpha: isDark ? 0.55 : 0.45),
+                    ],
                   ),
                 ),
               ),
-            if (section.arabic.trim().isNotEmpty)
-              Text(
-                section.arabic,
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.justify,
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: fontSize,
-                  height: 2.35,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            if (showTranslation && section.translation.trim().isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Divider(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                section.translation,
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.justify,
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: fontSize - 3,
-                  height: 2.1,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (hasRepeat)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    colorScheme.primary.withValues(
+                                      alpha: isDark ? 0.28 : 0.16,
+                                    ),
+                                    colorScheme.tertiary.withValues(
+                                      alpha: isDark ? 0.22 : 0.12,
+                                    ),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: colorScheme.primary.withValues(alpha: 0.35),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colorScheme.primary.withValues(alpha: 0.12),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.repeat_rounded,
+                                    size: 16,
+                                    color: colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    section.repeatLabel!.trim(),
+                                    textDirection: TextDirection.rtl,
+                                    style: TextStyle(
+                                      color: colorScheme.primary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (hasArabic)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(
+                              alpha: isDark ? 0.09 : 0.055,
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Text(
+                            section.arabic,
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.justify,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontSize: fontSize,
+                              height: 2.35,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      if (hasArabic && hasTranslation)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Divider(
+                                  color: colorScheme.outlineVariant.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                  thickness: 1,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary.withValues(alpha: 0.5),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Divider(
+                                  color: colorScheme.outlineVariant.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                  thickness: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (hasTranslation)
+                        const SizedBox(height: 4),
+                      if (hasTranslation)
+                        Text(
+                          section.translation,
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: fontSize - 3,
+                            height: 2.1,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
