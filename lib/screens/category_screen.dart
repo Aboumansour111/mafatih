@@ -29,6 +29,17 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   String? _selectedSubcategory;
 
+  // کش futureها تا با بازگشت از صفحه محتوا لیست از نو ساخته نشود و اسکرول نپرد
+  late final Future<List<Dua>> _duasFuture = _contentService.loadDuas();
+  late final Future<List<Amal>> _amalsFuture = _contentService.loadAmals();
+  late final Future<List<Ziyarat>> _ziyaratFuture = _contentService.loadZiyarat();
+  late final Future<List<QuranSurah>> _quranFuture = _contentService.loadQuran();
+  late final Future<List<dynamic>> _otherFuture = Future.wait([
+    _contentService.loadDuas(),
+    _contentService.loadAmals(),
+  ]);
+  late final Future<List<dynamic>> _favoritesFuture = _loadAllContent();
+
   @override
   Widget build(BuildContext context) {
     // اگر داخل زیردسته هستیم، دکمه بک اول زیردسته را می‌بندد نه کل صفحه را
@@ -96,10 +107,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: Future.wait([
-          _contentService.loadDuas(),
-          _contentService.loadAmals(),
-        ]),
+        future: _otherFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -135,6 +143,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
           }
 
           return ListView.builder(
+            key: PageStorageKey('other_list'),
             padding: const EdgeInsets.all(16),
             itemCount: items.length,
             itemBuilder: (context, index) {
@@ -189,7 +198,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
       body: FutureBuilder<List<QuranSurah>>(
-        future: _contentService.loadQuran(),
+        future: _quranFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -219,6 +228,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
           }
 
           return ListView.builder(
+            key: PageStorageKey('quran_list'),
             padding: const EdgeInsets.all(16),
             itemCount: surahs.length,
             itemBuilder: (context, index) {
@@ -254,7 +264,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: _loadAllContent(),
+        future: _favoritesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -311,6 +321,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               }
 
               return ListView.builder(
+            key: PageStorageKey('favorites_list'),
                 padding: const EdgeInsets.all(16),
                 itemCount: favoriteContent.length,
                 itemBuilder: (context, index) {
@@ -463,7 +474,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
       body: FutureBuilder<List<Dua>>(
-        future: _contentService.loadDuas(),
+        future: _duasFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -510,6 +521,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     final hasUncategorized = duas.any((dua) => dua.subcategory.isEmpty);
 
     return ListView(
+      key: PageStorageKey('duas_subcats_${widget.category.id}'),
       padding: const EdgeInsets.all(16),
       children: [
         ...subcategories.map(
@@ -554,6 +566,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     }
 
     return ListView.builder(
+            key: PageStorageKey('duas_items_${widget.category.id}_${_selectedSubcategory ?? "all"}'),
       padding: const EdgeInsets.all(16),
       itemCount: duas.length,
       itemBuilder: (context, index) {
@@ -617,7 +630,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
       body: FutureBuilder<List<Amal>>(
-        future: _contentService.loadAmals(),
+        future: _amalsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -670,6 +683,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     final hasUncategorized = amals.any((amal) => amal.subcategory.isEmpty);
 
     return ListView(
+      key: PageStorageKey('amal_subcats_${widget.category.id}'),
       padding: const EdgeInsets.all(16),
       children: [
         ...subcategories.map(
@@ -714,6 +728,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     }
 
     return ListView.builder(
+            key: PageStorageKey('amal_items_${widget.category.id}_${_selectedSubcategory ?? "all"}'),
       padding: const EdgeInsets.all(16),
       itemCount: amals.length,
       itemBuilder: (context, index) {
@@ -829,7 +844,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         actions: const [ThemeToggleButton(), SizedBox(width: 8)],
       ),
       body: FutureBuilder<List<Ziyarat>>(
-        future: _contentService.loadZiyarat(),
+        future: _ziyaratFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -878,6 +893,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     final hasUncategorized = ziyarat.any((item) => item.subcategory.isEmpty);
 
     return ListView(
+      key: PageStorageKey('ziyarat_subcats_${widget.category.id}'),
       padding: const EdgeInsets.all(16),
       children: [
         ...subcategories.map(
@@ -922,6 +938,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     }
 
     return ListView.builder(
+            key: PageStorageKey('ziyarat_items_${widget.category.id}_${_selectedSubcategory ?? "all"}'),
       padding: const EdgeInsets.all(16),
       itemCount: ziyarat.length,
       itemBuilder: (context, index) {
