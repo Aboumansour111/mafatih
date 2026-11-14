@@ -18,6 +18,7 @@ class _DhikrCounterScreenState extends State<DhikrCounterScreen>
   static const _prefsTargetKey = 'dhikr_target';
 
   static const List<String> _presets = [
+    'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَآلِ مُحَمَّدٍ الْأَئِمَّةِ وَالْمَهْدِيِّينَ وَسَلِّمْ تَسْلِيمًا',
     'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَآلِ مُحَمَّدٍ',
     'سُبْحَانَ اللَّهِ',
     'الْحَمْدُ لِلَّهِ',
@@ -28,7 +29,7 @@ class _DhikrCounterScreenState extends State<DhikrCounterScreen>
     'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
   ];
 
-  static const List<int> _targets = [33, 100, 300, 1000];
+  static const List<int> _targets = [100, 40, 313, 1000];
 
   int _count = 0;
   int _target = 100;
