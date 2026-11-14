@@ -11,6 +11,8 @@ val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
+val releaseKeystoreFile = file("mafatih-release-key.jks")
+val hasReleaseSigning = keystorePropertiesFile.exists() && releaseKeystoreFile.exists()
 
 android {
     namespace = "ir.mafatih.mafatih_yamani"
@@ -31,17 +33,23 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            keyAlias = "mafatih"
-            keyPassword = "Moh4mm4dm4hd!"
-            storePassword = "Moh4mm4dm4hd!"
-            storeFile = file("mafatih-release-key.jks")
+        if (hasReleaseSigning) {
+            create("release") {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = releaseKeystoreFile
+                storePassword = keystoreProperties.getProperty("storePassword")
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (hasReleaseSigning) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }
