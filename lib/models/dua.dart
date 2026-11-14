@@ -11,9 +11,9 @@ class DuaSection {
 
   factory DuaSection.fromJson(Map<String, dynamic> json) {
     return DuaSection(
-      arabic: json['arabic'] ?? '',
-      translation: json['translation'] ?? '',
-      repeatLabel: json['repeatLabel'] as String?,
+      arabic: (json['arabic'] ?? '').toString(),
+      translation: (json['translation'] ?? '').toString(),
+      repeatLabel: json['repeatLabel']?.toString(),
     );
   }
 }
@@ -34,32 +34,30 @@ class Dua {
   });
 
   factory Dua.fromJson(Map<String, dynamic> json) {
-    // اگر بعداً دعایی sections آماده داشته باشد،
-    // مستقیماً همان را استفاده می‌کنیم.
-    if (json['sections'] != null) {
-      return Dua(
-        id: json['id'],
-        title: json['title'],
-        category: json['category'],
-        subcategory: json['subcategory'] ?? '',
-        sections: (json['sections'] as List<dynamic>)
-            .map((item) => DuaSection.fromJson(item))
-            .toList(),
+    final sectionsData = json['sections'];
+    final List<DuaSection> sections;
+
+    if (sectionsData is List) {
+      sections = sectionsData
+          .whereType<Map<String, dynamic>>()
+          .map(DuaSection.fromJson)
+          .toList();
+    } else {
+      final arabic = (json['arabic'] ?? '').toString();
+      final translation = (json['translation'] ?? '').toString();
+      sections = _createSections(
+        arabic: arabic,
+        translation: translation,
       );
     }
 
-    // برای دعاهای فعلی که arabic و translation کامل دارند،
-    // به صورت خودکار فرازبندی می‌کنیم.
-    final arabic = json['arabic'] ?? '';
-    final translation = json['translation'] ?? '';
-
-    final sections = _createSections(arabic: arabic, translation: translation);
-
     return Dua(
-      id: json['id'],
-      title: json['title'],
-      category: json['category'],
-      subcategory: json['subcategory'] ?? '',
+      id: (json['id'] ?? '').toString(),
+      title: (json['title'] ?? 'دعای بدون عنوان').toString(),
+      // برخی رکوردهای واردشده از کانال category ندارند؛
+      // آن‌ها را به‌صورت پیش‌فرض در دسته ادعیه قرار می‌دهیم.
+      category: (json['category'] ?? 'duas').toString(),
+      subcategory: (json['subcategory'] ?? '').toString(),
       sections: sections,
     );
   }
@@ -72,17 +70,13 @@ class Dua {
       return [];
     }
 
-    // تقریباً معادل چند خط نمایش روی موبایل.
     const maxArabicCharacters = 180;
-
     final arabicParts = _splitText(arabic, maxArabicCharacters);
 
     if (arabicParts.isEmpty) {
       return [];
     }
 
-    // ترجمه را به همان تعداد بخش تقسیم می‌کنیم
-    // تا هر بخش عربی یک ترجمه متناظر داشته باشد.
     final translationParts = _splitIntoParts(translation, arabicParts.length);
 
     return List.generate(
@@ -92,14 +86,12 @@ class Dua {
         translation: index < translationParts.length
             ? translationParts[index]
             : '',
-        repeatLabel: null,
       ),
     );
   }
 
   static List<String> _splitText(String text, int maxCharacters) {
     final result = <String>[];
-
     String remaining = text.trim();
 
     while (remaining.isNotEmpty) {
@@ -109,13 +101,11 @@ class Dua {
       }
 
       int splitIndex = remaining.lastIndexOf(' ', maxCharacters);
-
       if (splitIndex <= 0) {
         splitIndex = maxCharacters;
       }
 
       result.add(remaining.substring(0, splitIndex).trim());
-
       remaining = remaining.substring(splitIndex).trim();
     }
 
@@ -128,7 +118,6 @@ class Dua {
     }
 
     final remaining = text.trim();
-
     if (partCount == 1) {
       return [remaining];
     }
@@ -143,15 +132,12 @@ class Dua {
       }
 
       final target = (remaining.length * (i + 1)) ~/ partCount;
-
       int splitIndex = remaining.indexOf(' ', target);
-
       if (splitIndex == -1) {
         splitIndex = target;
       }
 
       result.add(remaining.substring(start, splitIndex).trim());
-
       start = splitIndex;
     }
 
